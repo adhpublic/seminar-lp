@@ -1,4 +1,3 @@
-const GAS_URL='YOUR_GAS_URL_HERE';
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -298,29 +297,24 @@ function sub(){
         c=document.getElementById('co').value,
         m=document.getElementById('em').value,
         p=document.getElementById('ph').value,
-        t=document.getElementById('ti').value;
+        t=document.getElementById('ti').value,
+        lv=document.getElementById('dxLv')?.textContent||'';
   if(!n||!c||!m||!sd)return alert('必須項目をご入力ください。');
 
   const btn=document.getElementById('sbtn');
   btn.disabled=true;btn.textContent='送信中...';
 
-  // ▼▼▼ ここにGoogle Apps ScriptのURLを貼る ▼▼▼
-  const GAS_URL='https://script.google.com/macros/s/AKfycbwTO4QDxEP6Eu0OKloA81YxOo_cuCmeyF1ScXuQLz6_2pyKxzgB8HogNhJt04EzXBNJfA/exec';
-  // ▲▲▲
+  const FORM_URL='https://docs.google.com/forms/d/e/1FAIpQLSdcWu0F34n5uw1a6H2p8CV1NPk8D3UP47pyb1n3p7iEauAn1w/formResponse';
+  const params=new URLSearchParams();
+  params.append('entry.1634945403',n);
+  params.append('entry.347878583',c);
+  params.append('entry.590373692',m);
+  params.append('entry.1546807067',p);
+  params.append('entry.60641152',t+(lv?' ['+lv+']':''));
+  params.append('entry.1659957891',sd);
 
-  const data={name:n,company:c,email:m,phone:p,title:t,date:sd,
-              dx_level:document.getElementById('dxLv')?.textContent||'未診断',
-              submitted:new Date().toISOString()};
-
-  if(GAS_URL==='YOUR_GAS_URL_HERE'){
-    // GAS未設定時はデモモード
-    alert('お申し込みありがとうございます！\n\n'+c+' '+n+' 様\n日程: '+sd+'\n\n※ GAS連携を設定すると、Googleスプレッドシートに自動保存されます。');
-    btn.disabled=false;btn.textContent='この日程で席を確保する';
-    return;
-  }
-
-  fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(data)})
+  fetch(FORM_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:params.toString()})
   .then(()=>{
     btn.textContent='✅ お申し込み完了';
     document.querySelector('.frm').innerHTML='<div style="text-align:center;padding:24px;font-size:17px;line-height:1.8"><strong>'+c+' '+n+' 様</strong><br>お申し込みありがとうございます。<br><br>日程：<strong>'+sd+'</strong><br><br>ご登録のメールアドレス宛に<br>Zoom URLをお送りします。</div>';
