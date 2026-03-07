@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YeLLOWS DX — 売上シミュレーション 2026年3月-4月</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600;700;900&family=Noto+Serif+JP:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#09090b;--surface:#131316;--card:#1a1a1f;--border:#28282e;--gold:#c5a835;--gold-dim:rgba(197,168,53,.12);--blue:#5c9ce6;--green:#4caf50;--purple:#9c7ce6;--orange:#e09c4d;--red:#e05252;--teal:#4db6ac;--text:#e4e4e7;--sub:#71717a;--mono:'JetBrains Mono',monospace;--serif:'Noto Serif JP',serif;--sans:'Noto Sans JP',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.85;font-size:14px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:48px 28px 100px}
+
+/* Print */
+@media print{body{background:#fff;color:#222;font-size:11px}.wrap{padding:20px}h1,h2,h3{color:#222}.sim td,.sim th{border:1px solid #ccc}}
+
+/* Header */
+.hdr{text-align:center;padding:48px 0 36px;border-bottom:2px solid var(--gold);margin-bottom:48px}
+.hdr-tag{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:12px}
+.hdr h1{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--gold);line-height:1.4;margin-bottom:8px}
+.hdr p{color:var(--sub);font-size:12px}
+.hdr-date{font-family:var(--mono);font-size:11px;color:var(--sub);margin-top:12px}
+
+section{margin-bottom:48px}
+h2{font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+h3{font-size:14px;font-weight:700;margin:20px 0 10px;color:var(--gold)}
+
+/* Tables */
+.sim{width:100%;border-collapse:collapse;font-size:13px;margin:16px 0}
+.sim th{background:var(--surface);color:var(--gold);font-weight:600;padding:10px 14px;text-align:left;font-size:10px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid var(--gold-dim)}
+.sim td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.sim .num{font-family:var(--mono);font-weight:700;text-align:right;white-space:nowrap}
+.sim .gold{color:var(--gold)}
+.sim .green{color:var(--green)}
+.sim .blue{color:var(--blue)}
+.sim .red{color:var(--red)}
+.sim .total{background:var(--surface);font-weight:700}
+.sim .sub-row td{font-size:11px;color:var(--sub);padding:6px 14px;border-bottom:1px dotted var(--border)}
+
+/* Funnel */
+.funnel{display:flex;flex-direction:column;gap:3px;margin:20px 0}
+.f-step{display:grid;grid-template-columns:100px 1fr auto;background:var(--surface);padding:16px;font-size:12px;border-radius:4px;align-items:center;gap:12px}
+.f-step:first-child{border-radius:10px 10px 4px 4px}
+.f-step:last-child{border-radius:4px 4px 10px 10px}
+.f-num{font-family:var(--mono);font-size:22px;font-weight:700}
+.f-rev{font-family:var(--mono);font-size:14px;font-weight:700;text-align:right;white-space:nowrap}
+.f-arrow{text-align:center;color:var(--gold);font-size:11px;padding:2px}
+
+/* Cards */
+.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.card-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--sub);margin-bottom:4px}
+.card-num{font-family:var(--serif);font-size:28px;font-weight:700}
+.card-sub{font-size:11px;color:var(--sub);margin-top:4px}
+
+/* Scenario cards */
+.scenario-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.scenario{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.scenario-label{font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:8px}
+.scenario-total{font-family:var(--serif);font-size:26px;font-weight:700;margin-bottom:8px}
+.scenario-detail{font-size:11px;color:var(--sub);line-height:1.8;text-align:left}
+
+/* Info boxes */
+.info{background:var(--gold-dim);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:14px 18px;margin:16px 0;font-size:12px}
+.info strong{color:var(--gold)}
+.warn{background:rgba(224,82,82,.06);border-left:3px solid var(--red);padding:14px 18px;border-radius:0 8px 8px 0;margin:16px 0;font-size:12px}
+.warn strong{color:var(--red)}
+.note{background:rgba(92,156,230,.06);border-left:3px solid var(--blue);padding:14px 18px;border-radius:0 8px 8px 0;margin:16px 0;font-size:12px}
+.note strong{color:var(--blue)}
+
+/* Timeline */
+.tl{margin:20px 0}
+.tl-row{display:grid;grid-template-columns:90px 1fr;border-bottom:1px solid var(--border)}
+.tl-week{padding:14px 12px;font-family:var(--mono);font-size:11px;font-weight:700;background:var(--surface);border-right:2px solid var(--gold-dim)}
+.tl-body{padding:14px 16px;font-size:12px}
+.tl-body strong{color:var(--text)}
+.tl-nums{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.tl-num{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px}
+.tl-gold{background:rgba(197,168,53,.12);color:var(--gold)}
+.tl-blue{background:rgba(92,156,230,.12);color:var(--blue)}
+.tl-green{background:rgba(76,175,80,.12);color:var(--green)}
+.tl-red{background:rgba(224,82,82,.12);color:var(--red)}
+
+footer{text-align:center;padding:40px 0;border-top:2px solid var(--gold);margin-top:48px}
+footer p{color:var(--sub);font-size:11px}
+
+@media(max-width:700px){.card-grid,.scenario-grid{grid-template-columns:1fr}.f-step{grid-template-columns:70px 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <div class="hdr-tag">Revenue Simulation Report</div>
+  <h1>YeLLOWS DX<br>売上シミュレーション</h1>
+  <p>ウェビナー60名 → 経営者セミナー → 社員セミナー → DX実装 ｜ 2026年3月〜4月末＋中長期予測</p>
+  <div class="hdr-date">作成日: 2026年3月7日 ｜ Confidential</div>
+</div>
+
+<!-- ===== 1. EXECUTIVE SUMMARY ===== -->
+<section>
+<h2>1. エグゼクティブサマリー</h2>
+
+<div class="scenario-grid">
+  <div class="scenario" style="border-top:3px solid var(--orange)">
+    <div class="scenario-label" style="color:var(--orange)">WORST</div>
+    <div class="scenario-total" style="color:var(--orange)">¥1,550万</div>
+    <div class="scenario-detail">
+      経営者セミナー: ¥80万<br>
+      社員セミナー: ¥750万<br>
+      DX実装（着手金）: ¥540万<br>
+      Lab: ¥15万<br>
+      <strong>受注ベース / 4月末締</strong>
+    </div>
+  </div>
+  <div class="scenario" style="border-top:3px solid var(--gold)">
+    <div class="scenario-label" style="color:var(--gold)">BASE</div>
+    <div class="scenario-total" style="color:var(--gold)">¥3,175万</div>
+    <div class="scenario-detail">
+      経営者セミナー: ¥150万<br>
+      社員セミナー: ¥1,575万<br>
+      DX実装（着手金）: ¥1,260万<br>
+      Lab: ¥60万<br>
+      <strong>受注ベース / 4月末締</strong>
+    </div>
+  </div>
+  <div class="scenario" style="border-top:3px solid var(--green)">
+    <div class="scenario-label" style="color:var(--green)">BEST</div>
+    <div class="scenario-total" style="color:var(--green)">¥4,835万</div>
+    <div class="scenario-detail">
+      経営者セミナー: ¥240万<br>
+      社員セミナー: ¥2,400万<br>
+      DX実装（着手金）: ¥1,980万<br>
+      Lab: ¥120万<br>
+      <strong>受注ベース / 4月末締</strong>
+    </div>
+  </div>
+</div>
+
+<div class="info">
+  <strong>計上基準:</strong> 4月末時点の「受注契約＋事前請求」ベース。社員セミナーは事前請求。DX実装は着手金（半金）ベース。助成金の入金は研修終了後の申請・審査を経てからなので、ここには含まない。
+</div>
+</section>
+
+<!-- ===== 2. 商品体系 ===== -->
+<section>
+<h2>2. 商品体系と価格</h2>
+<table class="sim">
+<thead><tr><th>商品</th><th>価格</th><th>対象</th><th>形式</th><th>備考</th></tr></thead>
+<tbody>
+<tr><td><strong>経営者セミナー</strong></td><td class="num gold">¥100,000/名</td><td>経営者・役員（各社1名）</td><td>1日</td><td>通常¥198,000。ウェビナー参加者限定価格。<br>月2回・1回10名限定。4月末まで3回開催。</td></tr>
+<tr><td><strong>社員AIセミナー</strong></td><td class="num blue">¥150,000/名</td><td>社員5名〜</td><td>3h×4回 or 6h×2回<br>（12時間）</td><td>人材開発支援助成金対象。<br>3名の場合は合同研修も可。</td></tr>
+<tr><td><strong>DX実装パッケージ</strong></td><td class="num purple">¥360万/社〜</td><td>社員セミナー修了企業</td><td>3-6ヶ月</td><td>着手金50%（¥180万）＋完了時50%。<br>業務AI化・システム構築・定着支援込み。</td></tr>
+<tr><td><strong>YeLLOWS Lab.</strong></td><td class="num green">¥50,000/月</td><td>全クライアント</td><td>月額サブスク</td><td>質問対応・簡易システム構築・<br>AI勉強会・人的資本セミナー</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===== 3. 助成金シミュレーション ===== -->
+<section>
+<h2>3. 社員セミナー 助成金シミュレーション</h2>
+
+<h3>10名受講の場合</h3>
+<table class="sim">
+<thead><tr><th>項目</th><th>計算</th><th>金額</th></tr></thead>
+<tbody>
+<tr><td>研修費（企業負担）</td><td>¥150,000 × 10名</td><td class="num">¥1,500,000</td></tr>
+<tr><td>経費助成（75%）</td><td>¥1,500,000 × 75%</td><td class="num green">▲¥1,125,000</td></tr>
+<tr><td>賃金助成</td><td>12h × 10名 × ¥760</td><td class="num green">▲¥91,200</td></tr>
+<tr class="total"><td><strong>助成金合計</strong></td><td></td><td class="num green">▲¥1,216,200</td></tr>
+<tr class="total"><td><strong>企業の実質負担</strong></td><td></td><td class="num gold">¥283,800</td></tr>
+</tbody>
+</table>
+
+<h3>5名受講の場合</h3>
+<table class="sim">
+<thead><tr><th>項目</th><th>計算</th><th>金額</th></tr></thead>
+<tbody>
+<tr><td>研修費（企業負担）</td><td>¥150,000 × 5名</td><td class="num">¥750,000</td></tr>
+<tr><td>経費助成（75%）</td><td>¥750,000 × 75%</td><td class="num green">▲¥562,500</td></tr>
+<tr><td>賃金助成</td><td>12h × 5名 × ¥760</td><td class="num green">▲¥45,600</td></tr>
+<tr class="total"><td><strong>助成金合計</strong></td><td></td><td class="num green">▲¥608,100</td></tr>
+<tr class="total"><td><strong>企業の実質負担</strong></td><td></td><td class="num gold">¥141,900</td></tr>
+</tbody>
+</table>
+
+<div class="info">
+  <strong>営業時の説明ポイント:</strong><br>
+  10名: 150万円の研修 → 助成金で約122万円戻る → <strong>実質28万円（1人あたり2.8万円）</strong><br>
+  5名: 75万円の研修 → 助成金で約61万円戻る → <strong>実質14万円（1人あたり2.8万円）</strong>
+</div>
+
+<div class="note">
+  <strong>助成金の手続き上の注意:</strong><br>
+  ・訓練計画届は<strong>研修開始日の1ヶ月前まで</strong>に労働局に提出必須。<br>
+  ・事前請求＋事前入金は助成金要件上は問題なし。支給申請時（研修終了後2ヶ月以内）に支払い完了の領収書があればOK。<br>
+  ・助成金の入金は研修終了→支給申請→審査→振込で<strong>3-6ヶ月後</strong>。4月末の売上には含まない。<br>
+  ・計画届提出前の請求書発行について、念のため<strong>社労士に確認推奨</strong>。
+</div>
+</section>
+
+<!-- ===== 4. ファネル ===== -->
+<section>
+<h2>4. メインファネル（BASEシナリオ）</h2>
+
+<div class="funnel">
+  <div class="f-step">
+    <div class="f-num" style="color:var(--gold)">60名</div>
+    <div><strong>ウェビナー参加（3月中・6回開催）</strong><br>ほぼ全員が経営者・役員。第1回で30名集客済み。残り30名は直接声かけ＋追加告知。</div>
+    <div class="f-rev"></div>
+  </div>
+  <div class="f-arrow">↓ QRフォーム送信率 70%</div>
+  <div class="f-step">
+    <div class="f-num" style="color:var(--blue)">42名</div>
+    <div><strong>フォーム送信（リード獲得）</strong><br>セミナー希望/個別相談/ThinkDock/資料の4択複数選択。翌日スタッフ電話。</div>
+    <div class="f-rev"></div>
+  </div>
+  <div class="f-arrow">↓ 経営者セミナー申込率 36%（対フォーム）／ 25%（対ウェビナー）</div>
+  <div class="f-step">
+    <div class="f-num" style="color:var(--purple)">15名</div>
+    <div><strong>経営者セミナー参加（3回開催×5名）</strong><br>¥100,000/名。3月中旬〜4月中旬。</div>
+    <div class="f-rev gold">¥1,500,000</div>
+  </div>
+  <div class="f-arrow">↓ 社員セミナー移行率 70%（10万円払った経営者は確度が高い）</div>
+  <div class="f-step">
+    <div class="f-num" style="color:var(--blue)">10.5社</div>
+    <div><strong>社員セミナー受注</strong><br>平均7名/社（最小5名。3名以下は合同研修）。¥150,000/名。</div>
+    <div class="f-rev gold">¥15,750,000</div>
+  </div>
+  <div class="f-arrow">↓ DX実装移行率 67%（社員セミナーでDXの種を仕込む）</div>
+  <div class="f-step">
+    <div class="f-num" style="color:var(--green)">7社</div>
+    <div><strong>DX実装パッケージ受注</strong><br>¥360万/社。着手金50%（¥180万）を4月末までに請求。</div>
+    <div class="f-rev gold">¥12,600,000<br><span style="font-size:10px;color:var(--sub)">（着手金ベース）</span></div>
+  </div>
+  <div class="f-arrow">↓ Lab加入率 40%</div>
+  <div class="f-step">
+    <div class="f-num" style="color:var(--teal)">4社</div>
+    <div><strong>YeLLOWS Lab.加入</strong><br>¥50,000/月。4月から開始として残り3ヶ月分。</div>
+    <div class="f-rev gold">¥600,000</div>
+  </div>
+</div>
+
+<div class="info">
+  <strong>ファネルのポイント:</strong><br>
+  ・経営者セミナーの10万円は「フィルター」として機能。払った経営者の確度が高いため、社員セミナー移行率70%が成立する。<br>
+  ・元の計画（ウェビナー→個別商談60%→研修50%→DX45%）と比較して、経営者セミナーを挟むことで中間ステップが増えるが、各ステップの転換率が上がるため最終売上はほぼ同等。<br>
+  ・経営者セミナーを経由しない「直接個別相談→研修」ルートも並行して走る（下記ルートB）。
+</div>
+</section>
+
+<!-- ===== 5. 3シナリオ比較 ===== -->
+<section>
+<h2>5. 3シナリオ比較（4月末・受注ベース）</h2>
+
+<table class="sim">
+<thead><tr><th>収益源</th><th>保守（WORST）</th><th>BASE</th><th>楽観（BEST）</th></tr></thead>
+<tbody>
+
+<tr><td colspan="4" style="background:var(--surface);font-size:10px;color:var(--gold);letter-spacing:1px;font-weight:600">ルートA: ウェビナー → 経営者セミナー → 社員セミナー → DX</td></tr>
+<tr><td>経営者セミナー</td>
+  <td class="num">¥800,000<br><span style="color:var(--sub);font-size:10px">8名×¥10万</span></td>
+  <td class="num gold">¥1,500,000<br><span style="color:var(--sub);font-size:10px">15名×¥10万</span></td>
+  <td class="num green">¥2,400,000<br><span style="color:var(--sub);font-size:10px">24名×¥10万</span></td>
+</tr>
+<tr><td>社員セミナー（ルートA）</td>
+  <td class="num">¥3,750,000<br><span style="color:var(--sub);font-size:10px">5社×5名×¥15万</span></td>
+  <td class="num gold">¥11,025,000<br><span style="color:var(--sub);font-size:10px">10.5社×7名×¥15万</span></td>
+  <td class="num green">¥18,000,000<br><span style="color:var(--sub);font-size:10px">15社×8名×¥15万</span></td>
+</tr>
+<tr><td>DX実装（着手金）</td>
+  <td class="num">¥5,400,000<br><span style="color:var(--sub);font-size:10px">3社×¥180万</span></td>
+  <td class="num gold">¥12,600,000<br><span style="color:var(--sub);font-size:10px">7社×¥180万</span></td>
+  <td class="num green">¥19,800,000<br><span style="color:var(--sub);font-size:10px">11社×¥180万</span></td>
+</tr>
+
+<tr><td colspan="4" style="background:var(--surface);font-size:10px;color:var(--blue);letter-spacing:1px;font-weight:600">ルートB: ウェビナー → 直接個別商談 → 社員セミナー → DX（経営者セミナーを経由しない層）</td></tr>
+<tr><td>社員セミナー（ルートB）</td>
+  <td class="num">¥0<br><span style="color:var(--sub);font-size:10px">なし</span></td>
+  <td class="num blue">¥4,725,000<br><span style="color:var(--sub);font-size:10px">4.5社×7名×¥15万</span></td>
+  <td class="num blue">¥6,000,000<br><span style="color:var(--sub);font-size:10px">5社×8名×¥15万</span></td>
+</tr>
+
+<tr><td colspan="4" style="background:var(--surface);font-size:10px;color:var(--green);letter-spacing:1px;font-weight:600">継続収益</td></tr>
+<tr><td>YeLLOWS Lab.</td>
+  <td class="num">¥150,000<br><span style="color:var(--sub);font-size:10px">1社×3M</span></td>
+  <td class="num gold">¥600,000<br><span style="color:var(--sub);font-size:10px">4社×3M</span></td>
+  <td class="num green">¥1,200,000<br><span style="color:var(--sub);font-size:10px">8社×3M</span></td>
+</tr>
+
+<tr class="total">
+  <td style="font-size:15px"><strong>4月末 合計（受注ベース）</strong></td>
+  <td class="num" style="font-size:20px;color:var(--orange)">¥1,010万</td>
+  <td class="num" style="font-size:20px;color:var(--gold)">¥3,045万</td>
+  <td class="num" style="font-size:20px;color:var(--green)">¥4,740万</td>
+</tr>
+</tbody>
+</table>
+
+<div class="info">
+  <strong>元の計画（¥3,060万）との比較:</strong><br>
+  BASEシナリオ ¥3,045万 ≒ 元の計画¥3,060万とほぼ同等。<br>
+  経営者セミナーを挟んだことで社員セミナーへの転換率が上がり、さらにルートBの直接商談組も加わることで、元の計画と同水準を維持。
+</div>
+</section>
+
+<!-- ===== 6. 前提条件 ===== -->
+<section>
+<h2>6. 前提条件と転換率の根拠</h2>
+
+<table class="sim">
+<thead><tr><th>ステージ</th><th>転換率</th><th>根拠</th></tr></thead>
+<tbody>
+<tr><td>ウェビナー参加</td><td class="num">60名</td><td>第1回で30名集客済み。残り30名は直接声かけ＋追加告知。固い数字。</td></tr>
+<tr><td>QRフォーム送信</td><td class="num">70%</td><td>「資料だけ」の選択肢を含むため送信ハードルが低い。フォーム送信者にThinkDockデモ版アクセスを提供。</td></tr>
+<tr><td>経営者セミナー申込</td><td class="num gold">25%<br><span style="color:var(--sub);font-size:10px">（対ウェビナー）</span></td><td>無料→10万円の転換。BtoB有料セミナーの一般的転換率15-25%の上限。ウェビナー内容の質と返金保証で上限を狙う。</td></tr>
+<tr><td>社員セミナー移行</td><td class="num gold">70%<br><span style="color:var(--sub);font-size:10px">（対経営者セミナー）</span></td><td>10万円を払った経営者はすでに投資判断を開始。セミナーで自社データを使った体感があるため移行率が高い。元の計画の50%より高い。</td></tr>
+<tr><td>DX実装移行</td><td class="num gold">67%<br><span style="color:var(--sub);font-size:10px">（対社員セミナー）</span></td><td>社員セミナー中にDXアセスメントの種を仕込む設計。「うちの業務もAI化できるのでは」と社員自身が言い出す状態を作る。元の計画の45%より高い（社員セミナーという関係性構築ステップが入るため）。</td></tr>
+<tr><td>ルートB直接商談</td><td class="num blue">10.7%<br><span style="color:var(--sub);font-size:10px">（フォーム42名中4.5社）</span></td><td>フォームで「個別相談」を選んだ人＋翌日電話で「セミナーより直接話したい」人。経営者セミナーの日程が合わない・10万円に躊躇するが興味はある層。</td></tr>
+<tr><td>Lab加入</td><td class="num green">40%<br><span style="color:var(--sub);font-size:10px">（対全クライアント）</span></td><td>月5万円のサブスクは研修・DX実装を受けた企業にとって低コスト。質問対応＋簡易システム構築の即時価値。</td></tr>
+</tbody>
+</table>
+
+<h3>社員セミナー受講人数の前提</h3>
+<table class="sim">
+<thead><tr><th>シナリオ</th><th>平均受講人数/社</th><th>根拠</th></tr></thead>
+<tbody>
+<tr><td>保守</td><td class="num">5名</td><td>最小施行人数。「まず少人数で試したい」企業。</td></tr>
+<tr><td>BASE</td><td class="num gold">7名</td><td>中小企業の1部門規模。経営者セミナーで体感済みのため「もう少し多く」。</td></tr>
+<tr><td>楽観</td><td class="num green">8-9名</td><td>複数部門から参加。経営者の強い推進力がある場合。</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===== 7. タイムライン ===== -->
+<section>
+<h2>7. 実行タイムライン（3月中旬〜4月末）</h2>
+
+<div class="tl">
+<div class="tl-row">
+  <div class="tl-week" style="color:var(--gold)">W1<br>3/8-14</div>
+  <div class="tl-body">
+    <strong>ウェビナー#1-2 開催 + 第2弾告知開始</strong><br>
+    第1回30名参加済み。QRフォーム回収。翌日スタッフ電話。直接声かけで追加集客開始。
+    <div class="tl-nums">
+      <span class="tl-num tl-gold">ウェビナー累計: 30名</span>
+      <span class="tl-num tl-blue">フォーム回収: 21名</span>
+    </div>
+  </div>
+</div>
+<div class="tl-row">
+  <div class="tl-week" style="color:var(--gold)">W2<br>3/15-21</div>
+  <div class="tl-body">
+    <strong>ウェビナー#3-4 + 経営者セミナー#1 申込受付開始</strong><br>
+    追加ウェビナー開催。経営者セミナー#1（3月下旬）の申込受付。
+    <div class="tl-nums">
+      <span class="tl-num tl-gold">ウェビナー累計: 45名</span>
+      <span class="tl-num tl-red">セミナー#1申込: 5-8名</span>
+    </div>
+  </div>
+</div>
+<div class="tl-row">
+  <div class="tl-week" style="color:var(--gold)">W3<br>3/22-28</div>
+  <div class="tl-body">
+    <strong>ウェビナー#5-6 + 経営者セミナー#1 開催</strong><br>
+    ウェビナー集客完了（60名到達）。経営者セミナー#1実施。参加者の社員セミナー受注開始。計画届の準備を社労士と開始。
+    <div class="tl-nums">
+      <span class="tl-num tl-gold">ウェビナー累計: 60名</span>
+      <span class="tl-num tl-red">セミナー#1: 5名参加</span>
+      <span class="tl-num tl-green">社員セミナー受注開始</span>
+    </div>
+  </div>
+</div>
+<div class="tl-row">
+  <div class="tl-week" style="color:var(--blue)">W4<br>3/29-4/4</div>
+  <div class="tl-body">
+    <strong>経営者セミナー#2 + 社員セミナー計画届提出</strong><br>
+    セミナー#2開催。セミナー#1参加者の社員セミナー契約・事前請求。計画届を労働局に提出開始。
+    <div class="tl-nums">
+      <span class="tl-num tl-red">セミナー#2: 5名参加</span>
+      <span class="tl-num tl-blue">社員セミナー契約: 3-5社</span>
+      <span class="tl-num tl-green">計画届提出開始</span>
+    </div>
+  </div>
+</div>
+<div class="tl-row">
+  <div class="tl-week" style="color:var(--blue)">W5-6<br>4/5-18</div>
+  <div class="tl-body">
+    <strong>経営者セミナー#3 + 社員セミナー受注加速 + DX実装商談</strong><br>
+    セミナー#3開催。追加の社員セミナー受注。DX実装の提案・見積り開始。ルートB（直接商談）も並行。
+    <div class="tl-nums">
+      <span class="tl-num tl-red">セミナー#3: 5名参加</span>
+      <span class="tl-num tl-blue">社員セミナー累計契約: 8-12社</span>
+      <span class="tl-num tl-gold">DX実装商談: 5-7社</span>
+    </div>
+  </div>
+</div>
+<div class="tl-row">
+  <div class="tl-week" style="color:var(--green)">W7-8<br>4/19-30</div>
+  <div class="tl-body">
+    <strong>最終クロージング + DX着手金請求 + 4月集計</strong><br>
+    未決定企業の最終プッシュ。DX実装の契約・着手金請求。全受注の集計。
+    <div class="tl-nums">
+      <span class="tl-num tl-green">社員セミナー最終受注: 10-15社</span>
+      <span class="tl-num tl-gold">DX実装受注: 3-7社</span>
+      <span class="tl-num tl-gold">4月末売上: ¥1,010-4,740万</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="warn">
+  <strong>キャパシティ制約:</strong><br>
+  関本の稼働: 経営者セミナー3回（各1日）＋社員セミナー10社（各12h）＋DX商談7社 = 約160時間 / 7週間 = 週23時間。<br>
+  <strong>本業と並行するとタイト。</strong> 対策: ①社員セミナーの一部を5月以降にスケジュール（受注は4月、実施は5月）②サブ講師の育成③DX商談は夜間・土曜に実施。
+</div>
+</section>
+
+<!-- ===== 8. 計上タイミング ===== -->
+<section>
+<h2>8. 売上計上タイミングの整理</h2>
+
+<table class="sim">
+<thead><tr><th>収益源</th><th>契約タイミング</th><th>請求タイミング</th><th>4月末計上</th><th>入金タイミング</th></tr></thead>
+<tbody>
+<tr><td><strong>経営者セミナー</strong></td><td>申込時</td><td>申込時（事前支払い）</td><td class="num green">○ 全額計上</td><td>セミナー前に入金</td></tr>
+<tr><td><strong>社員セミナー</strong></td><td>経営者セミナー後</td><td>事前請求</td><td class="num green">○ 全額計上</td><td>研修開始前に入金</td></tr>
+<tr><td><strong>DX実装（着手金）</strong></td><td>社員セミナー中〜後</td><td>契約時に半金請求</td><td class="num gold">△ 着手金のみ</td><td>契約後1ヶ月以内</td></tr>
+<tr><td><strong>DX実装（完了金）</strong></td><td>—</td><td>実装完了時</td><td class="num red">× 4月末には未計上</td><td>7-9月以降</td></tr>
+<tr><td><strong>YeLLOWS Lab.</strong></td><td>随時</td><td>月初請求</td><td class="num green">○ 4月分まで計上</td><td>月初入金</td></tr>
+<tr><td><strong>助成金還付</strong></td><td>—</td><td>研修終了後2ヶ月以内に申請</td><td class="num red">× 4月末には未入金</td><td>申請後3-6ヶ月</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===== 9. リスクと対策 ===== -->
+<section>
+<h2>9. リスクと対策</h2>
+
+<table class="sim">
+<thead><tr><th>リスク</th><th>影響</th><th>対策</th></tr></thead>
+<tbody>
+<tr><td><strong>経営者セミナー10万円の申込率が想定以下</strong></td><td>BASE 15名→8名に減少。下流全体が縮小。</td><td>①ウェビナー当日限定で¥100,000（翌日以降¥198,000）の緊急性追加<br>②全額返金保証で参加ハードル低減<br>③フォロー電話で個別に「まずはセミナーで試してみては」と促す</td></tr>
+<tr><td><strong>社員セミナーの受講人数が平均5名以下</strong></td><td>1社あたり売上が¥75万→¥45-60万に。</td><td>①3名以下の企業を合同研修にまとめる（売上は維持、関本の工数削減）<br>②経営者セミナーで「最低5名」の推奨を明示</td></tr>
+<tr><td><strong>助成金の計画届が間に合わない</strong></td><td>研修開始1ヶ月前までに提出必須。4月研修なら3月中の提出が必要。</td><td>①社労士と連携し、受注即日で計画届の準備開始<br>②研修実施を1ヶ月後ろ倒し（受注は4月、研修は5月開始）にする選択肢</td></tr>
+<tr><td><strong>DX実装の着手金が4月末に間に合わない</strong></td><td>DX実装売上¥1,260万が消える。</td><td>①社員セミナー中にDXの提案を仕込み、セミナー最終日に見積り提示<br>②着手金の請求を「契約書締結日」にする（実装開始前でも請求可能に）</td></tr>
+<tr><td><strong>関本のキャパシティ不足</strong></td><td>全てが遅延。品質低下。</td><td>①社員セミナーの実施を5月以降にずらす（受注だけ4月に）<br>②サブ講師の育成を並行で開始<br>③DX商談の一部をオンラインに切り替え</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===== 10. 5月以降 ===== -->
+<section>
+<h2>10. 5月以降の収益見通し</h2>
+
+<table class="sim">
+<thead><tr><th>期間</th><th>主な収益</th><th>累積売上（BASE）</th></tr></thead>
+<tbody>
+<tr><td>4月末時点</td><td>経営者セミナー + 社員セミナー + DX着手金 + Lab</td><td class="num gold">¥3,045万</td></tr>
+<tr><td>5-6月</td><td>DX実装の完了金（¥180万×7社=¥1,260万）+ 追加の社員セミナー + 4月ウェビナーからのパイプライン</td><td class="num gold">¥4,800万〜</td></tr>
+<tr><td>7-9月</td><td>DX定着支援（¥10万/月×社数）+ 2期目ウェビナー→研修のサイクル + Lab継続</td><td class="num gold">¥6,000万〜</td></tr>
+<tr><td>年末（12月）</td><td>DXテンプレート化による効率UP + クロスセル（チームビルディング等）</td><td class="num green">¥8,000万〜</td></tr>
+</tbody>
+</table>
+
+<div class="info">
+  <strong>重要:</strong> 4月以降もウェビナーを継続すれば、毎月新規パイプラインが追加される。月60名×年間で720名の経営者との接点。このエンジンが回り続ける限り、BASEシナリオの<strong>年間¥8,000万〜</strong>は射程内。
+</div>
+</section>
+
+<footer>
+  <p style="color:var(--gold);font-size:14px;font-weight:700;margin-bottom:8px">研修で入って、DXで稼ぐ。</p>
+  <p>YeLLOWS DX — 売上シミュレーション 2026年3月-4月</p>
+  <p>© 2026 YeLLOWS Inc. ｜ Confidential</p>
+</footer>
+
+</div>
+</body>
+</html>
