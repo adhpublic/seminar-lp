@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI活用スターターキット — YeLLOWS Inc.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── リセット & 変数 ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:      #080C18;
+  --card:     #111827;
+  --card2:    #192338;
+  --card3:    #0d1525;
+  --line:     #1e2d45;
+  --gold:     #F5C842;
+  --gold-dim: #1c1600;
+  --blue:     #5A9FEA;
+  --blue-dim: #0d1a30;
+  --teal:     #2DD4BF;
+  --teal-dim: #0a1e1c;
+  --coral:    #FF7070;
+  --coral-dim:#1a0808;
+  --violet:   #B090FA;
+  --green:    #50DE88;
+  --tw:       #EEF3FA;
+  --ts:       #8A9BB5;
+  --td:       #4A5A72;
+  --radius:   10px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--tw);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── 共通ユーティリティ ─────────────────────────────────────────────── */
+.gold  { color: var(--gold);  }
+.blue  { color: var(--blue);  }
+.teal  { color: var(--teal);  }
+.coral { color: var(--coral); }
+.green { color: var(--green); }
+.violet{ color: var(--violet);}
+.muted { color: var(--ts);    }
+
+.badge {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: .03em;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 5px;
+  border: 1px solid currentColor;
+  opacity: .85;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.section-label .num {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gold);
+}
+.section-label .sub {
+  font-size: 12px;
+  color: var(--ts);
+}
+
+/* ── トップバー ─────────────────────────────────────────────────────── */
+.topbar {
+  height: 5px;
+  background: var(--gold);
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+}
+
+/* ── ナビ ───────────────────────────────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 5px;
+  z-index: 99;
+  background: rgba(8,12,24,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 52px;
+}
+nav .logo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-right: auto;
+  letter-spacing: .05em;
+}
+nav a {
+  color: var(--ts);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 6px;
+  transition: color .2s, background .2s;
+}
+nav a:hover { color: var(--tw); background: var(--card); }
+
+/* ── ヒーロー（表紙） ──────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 80px 48px 60px;
+  gap: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 40%, rgba(90,159,234,.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 70%, rgba(245,200,66,.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-left { position: relative; z-index: 1; }
+
+.hero-eyebrow {
+  margin-bottom: 24px;
+}
+
+.hero-title {
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  margin-bottom: 8px;
+}
+.hero-title span {
+  display: block;
+  color: var(--gold);
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+
+.hero-divider {
+  width: 64px;
+  height: 2px;
+  background: var(--line);
+  margin: 28px 0;
+}
+
+.hero-desc {
+  color: var(--ts);
+  font-size: 14px;
+  line-height: 1.8;
+  max-width: 440px;
+  margin-bottom: 32px;
+}
+
+.hero-contents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hero-contents li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  list-style: none;
+}
+.hero-contents .pg {
+  width: 40px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: 'DM Mono', monospace;
+}
+
+/* 右側のターゲットカード */
+.hero-right {
+  position: relative;
+  z-index: 1;
+}
+
+.target-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+}
+.target-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gold);
+}
+
+.target-card h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 20px;
+}
+
+.target-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.target-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+}
+.target-list .dot {
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.author-line {
+  color: var(--td);
+  font-size: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  margin-top: 18px;
+}
+
+/* ── セクション共通 ─────────────────────────────────────────────────── */
+section {
+  padding: 80px 48px;
+}
+section + section {
+  border-top: 1px solid var(--line);
+}
+
+.sec-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.sec-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--gold);
+  width: 32px; height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.sec-title-block h2 {
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 800;
+  letter-spacing: -.01em;
+  line-height: 1.2;
+}
+.sec-title-block p {
+  color: var(--ts);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ── P1: リード + 図解 ──────────────────────────────────────────────── */
+.lead-box {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+.lead-box h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.lead-box p {
+  color: var(--ts);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* NG/OK 図解 */
+.compare-block {
+  background: var(--card3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 28px;
+}
+.compare-block h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tw);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.compare-box {
+  border-radius: 8px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.compare-box::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.compare-box.ng { background: var(--coral-dim); }
+.compare-box.ng::after { background: var(--coral); }
+.compare-box.ok { background: #0a1a0a; }
+.compare-box.ok::after { background: var(--green); }
+
+.compare-box .label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.compare-box.ng .label { color: var(--coral); }
+.compare-box.ok .label { color: var(--green); }
+.compare-box .big-text {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.compare-box .small-text {
+  font-size: 12px;
+  color: var(--ts);
+  line-height: 1.6;
+}
+
+.compare-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 700;
+}
+.compare-arrow .arrow-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.compare-result {
+  background: var(--gold-dim);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+.compare-result .r1 { font-size: 13px; font-weight: 700; color: var(--gold); }
+.compare-result .r2 { font-size: 14px; font-weight: 700; color: var(--tw);   }
+
+/* 3鉄則カード */
+.principle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.principle-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp .5s ease forwards;
+}
+.principle-card:nth-child(2) { animation-delay: .1s; }
+.principle-card:nth-child(3) { animation-delay: .2s; }
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: none; }
+}
+
+.principle-card .card-top {
+  padding: 4px 0 0;
+}
+.principle-card .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+.principle-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.principle-card .circle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: var(--ink);
+}
+.principle-card .card-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.mini-box {
+  border-radius: 7px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  position: relative;
+  padding-left: 18px;
+  border-left: 3px solid;
+}
+.mini-box.ok  { background: #0a1a0a; }
+.mini-box.ng  { background: var(--coral-dim); }
+.mini-box .mini-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+.principle-card .desc {
+  font-size: 13px;
+  color: var(--ts);
+  line-height: 1.7;
+  margin-top: auto;
+}
+
+/* ── P2: テクニック詳細 ─────────────────────────────────────────────── */
+.tech-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tech-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fadeUp .5s ease forwards;
+}
+.tech-card:nth-child(2) { animation-delay: .1s; }
+.tech-card:nth-child(3) { animation-delay: .2s; }
+
+.tech-card-header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.tech-card-header .t-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+.tech-card-header h3 { font-size: 18px; font-weight: 700; }
+.tech-card-header .en { font-size: 12px; color: var(--ts); margin-left: 4px; }
+.tech-card-header .tag { margin-left: auto; }
+
+.tech-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1.8fr 1.2fr;
+  gap: 0;
+}
+.tech-col {
+  padding: 22px 24px;
+  border-right: 1px solid var(--line);
+}
+.tech-col:last-child { border-right: none; }
+.tech-col h4 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.tech-col p { font-size: 13px; color: var(--ts); line-height: 1.75; }
+
+/* プロンプトボックス */
+.prompt-box {
+  background: var(--card3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.prompt-box .p-line { display: block; }
+.prompt-box .hl {
+  background: #0e2238;
+  color: var(--blue);
+  border-radius: 4px;
+  padding: 0 4px;
+  font-weight: 500;
+}
+
+/* 使用例 */
+.example-box {
+  background: #0a1420;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--tw);
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+.tip-box {
+  font-size: 13px;
+  color: var(--ts);
+  line-height: 1.7;
+}
+.tip-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--gold);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* ── P3: Gemini vs Claude ───────────────────────────────────────────── */
+.vs-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: start;
+}
+
+.ai-labels {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.ai-label {
+  padding: 8px 20px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.ai-label span { display: block; font-size: 10px; font-weight: 400; opacity: .7; margin-top: 2px; }
+
+.vs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.vs-table th {
+  background: #192540;
+  color: var(--ts);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  padding: 10px 14px;
+  text-align: left;
+}
+.vs-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.5;
+}
+.vs-table tr:nth-child(odd) td  { background: var(--card);  }
+.vs-table tr:nth-child(even) td { background: var(--card2); }
+.vs-table td.scene { color: var(--tw); }
+.vs-table td.good  { color: var(--green);  }
+.vs-table td.weak  { color: var(--coral);  }
+.vs-table td.ok    { color: var(--blue);   }
+
+.rec-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.rec-badge.claude { background: var(--teal-dim); color: var(--teal); }
+.rec-badge.gemini { background: var(--blue-dim); color: var(--blue); }
+
+/* 右カラム */
+.vs-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.checklist-header {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.checklist-header h3 { font-size: 15px; font-weight: 700; color: var(--gold); margin-bottom: 6px; }
+.checklist-header p  { font-size: 12px; color: var(--ts); line-height: 1.6; }
+
+.check-item {
+  background: var(--card2);
+  border-radius: 7px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  border-left: 3px solid;
+  transition: transform .15s;
+}
+.check-item:hover { transform: translateX(3px); }
+.check-item .ans {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.vs-tip {
+  background: var(--gold-dim);
+  border: 1px solid rgba(245,200,66,.2);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 16px 18px;
+  font-size: 13px;
+  color: var(--ts);
+  line-height: 1.7;
+}
+.vs-tip strong { color: var(--gold); }
+
+/* ── P4: プロンプト集 ─────────────────────────────────────────────── */
+.prompt-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.prompt-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fadeUp .5s ease forwards;
+}
+.prompt-card:nth-child(2) { animation-delay: .07s; }
+.prompt-card:nth-child(3) { animation-delay: .14s; }
+.prompt-card:nth-child(4) { animation-delay: .21s; }
+.prompt-card:nth-child(5) { animation-delay: .28s; }
+.prompt-card:nth-child(6) { animation-delay: .35s; }
+
+.prompt-card-top {
+  height: 4px;
+}
+.prompt-card-inner {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+}
+.prompt-card .p-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.p-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding-top: 2px;
+}
+.p-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
+
+.prompt-content {
+  background: var(--card3);
+  border-radius: 7px;
+  padding: 14px;
+  font-size: 12.5px;
+  line-height: 2;
+  flex: 1;
+}
+.prompt-content .p-line { display: block; }
+.prompt-content .hl {
+  background: #0e2238;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-weight: 500;
+}
+
+.prompt-divider {
+  height: 1px;
+  background: var(--line);
+}
+
+.prompt-tip {
+  font-size: 12px;
+  color: var(--ts);
+  line-height: 1.65;
+}
+.prompt-tip .t-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.prompt-result {
+  background: var(--card3);
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ── フッター ────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--line);
+  padding: 24px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--td);
+  font-size: 12px;
+}
+footer .gold { font-weight: 700; }
+
+/* ── スクロールアニメーション ─────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .55s ease, transform .55s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── レスポンシブ ────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero              { grid-template-columns: 1fr; padding: 60px 24px; }
+  section            { padding: 56px 24px; }
+  .principle-grid    { grid-template-columns: 1fr; }
+  .tech-card-body    { grid-template-columns: 1fr; }
+  .tech-col          { border-right: none; border-bottom: 1px solid var(--line); }
+  .vs-layout         { grid-template-columns: 1fr; }
+  .prompt-grid       { grid-template-columns: 1fr; }
+  .compare-row       { grid-template-columns: 1fr; }
+  nav a              { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar"></div>
+
+<!-- ナビ -->
+<nav>
+  <span class="logo">YeLLOWS Inc.</span>
+  <a href="#p1">3つの鉄則</a>
+  <a href="#p2">テクニック詳細</a>
+  <a href="#p3">使い分けガイド</a>
+  <a href="#p4">プロンプト集</a>
+</nav>
+
+<!-- ── ヒーロー ── -->
+<section class="hero" id="top">
+  <div class="hero-left">
+    <div class="hero-eyebrow">
+      <span class="badge">AI活用ウェビナー 参加者限定特典</span>
+    </div>
+    <h1 class="hero-title">
+      AI活用
+      <span>スターターキット</span>
+    </h1>
+    <div class="hero-divider"></div>
+    <p class="hero-desc">
+      このキットは、AIを「なんとなく使っている」段階から「成果が出る使い方」にステップアップするための実践ガイドです。難しい設定は一切不要。プロンプトをコピーして貼り付けるだけで、明日からすぐ実践いただけます。
+    </p>
+    <ul class="hero-contents">
+      <li>
+        <span class="pg" style="background:var(--gold);color:var(--ink);">P1</span>
+        AIをうまく使う3つのテクニック
+      </li>
+      <li>
+        <span class="pg" style="background:var(--blue);color:var(--ink);">P2</span>
+        GeminiとClaudeの使い分けガイド
+      </li>
+      <li>
+        <span class="pg" style="background:var(--teal);color:var(--ink);">P3</span>
+        コピペで使える穴埋めプロンプト集
+      </li>
+    </ul>
+  </div>
+
+  <div class="hero-right">
+    <div class="target-card">
+      <h3>この資料の対象の方</h3>
+      <ul class="target-list">
+        <li><span class="dot"></span>AIを使い始めたばかりの方</li>
+        <li><span class="dot"></span>経営者・管理職・一般社員の方</li>
+        <li><span class="dot"></span>会社でのAI導入を検討中の方</li>
+      </ul>
+      <div class="author-line">YeLLOWS Inc.  関本大輔</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── P1: 3つの鉄則 ── -->
+<section id="p1">
+  <div class="sec-header reveal">
+    <div class="sec-num">01</div>
+    <div class="sec-title-block">
+      <h2>AIをうまく使う「3つの鉄則」</h2>
+      <p>まず知っておきたい基礎知識</p>
+    </div>
+  </div>
+
+  <div class="lead-box reveal">
+    <h3>AIは「指示を出すほど賢くなる」ツールです</h3>
+    <p>AIは「何でも知っている万能ツール」ではありません。的確な指示を出せばプロ級の回答を返してくれますが、曖昧な指示では的外れな回答が返ってきます。多くの方が最初にぶつかる「回答が薄い・使えない」という壁は、たった3つの工夫で解決できます。</p>
+  </div>
+
+  <!-- NG/OK 図解 -->
+  <div class="compare-block reveal">
+    <h4>3要素を加えるだけで回答品質が劇的に変わります</h4>
+    <div class="compare-row">
+      <div class="compare-box ng">
+        <span class="label">NG  悪い指示の例</span>
+        <div class="big-text">「メールを書いて」</div>
+        <div class="small-text">→ 誰向け？何のため？形式は？<br>情報不足で使えない回答が返ってくる</div>
+      </div>
+      <div class="compare-arrow">
+        <span class="arrow-icon">&#8594;</span>
+        <span>3要素<br>を追加</span>
+      </div>
+      <div class="compare-box ok">
+        <span class="label">OK  良い指示（3要素入り）</span>
+        <div class="big-text">役割＋形式＋背景を指定した依頼</div>
+        <div class="small-text">→ 目的・対象・形式が明確<br>そのまま使える成果物が返ってくる</div>
+      </div>
+      <div class="compare-result">
+        <span class="r1">3要素を入れるだけで</span>
+        <span class="r2">回答品質が変わります</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3鉄則カード -->
+  <div class="principle-grid">
+
+    <div class="principle-card">
+      <div class="card-top" style="background:var(--gold);"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <div class="circle" style="background:var(--gold);">01</div>
+          <h3 class="card-title">役割（Role）</h3>
+        </div>
+        <div class="mini-box ok" style="border-color:var(--green);">
+          <span class="mini-label" style="color:var(--green);">OK例</span>
+          "あなたは10年経験の人事コンサルです"
+        </div>
+        <div class="mini-box ng" style="border-color:var(--coral);">
+          <span class="mini-label" style="color:var(--coral);">やりがちなNG例</span>
+          "専門家として教えて"だけ → 役割が曖昧で回答が浅くなる
+        </div>
+        <p class="desc">役割は具体的であればあるほど効果的です。「専門家」より「10年経験の〇〇コンサル」のように詳しく書きましょう。</p>
+      </div>
+    </div>
+
+    <div class="principle-card">
+      <div class="card-top" style="background:var(--blue);"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <div class="circle" style="background:var(--blue);">02</div>
+          <h3 class="card-title">形式（Format）</h3>
+        </div>
+        <div class="mini-box ok" style="border-color:var(--green);">
+          <span class="mini-label" style="color:var(--green);">OK例</span>
+          "表形式で" "3つに分けて" "A4 1枚で"
+        </div>
+        <div class="mini-box ng" style="border-color:var(--coral);">
+          <span class="mini-label" style="color:var(--coral);">やりがちなNG例</span>
+          形式を指定しない → 長文で使えない回答が返ってくる
+        </div>
+        <p class="desc">出力形式を先に指定するだけで、整形不要・そのまま使える成果物になります。</p>
+      </div>
+    </div>
+
+    <div class="principle-card">
+      <div class="card-top" style="background:var(--teal);"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <div class="circle" style="background:var(--teal);">03</div>
+          <h3 class="card-title">背景（Context）</h3>
+        </div>
+        <div class="mini-box ok" style="border-color:var(--green);">
+          <span class="mini-label" style="color:var(--green);">OK例</span>
+          "取締役会向けの稟議資料に使います"
+        </div>
+        <div class="mini-box ng" style="border-color:var(--coral);">
+          <span class="mini-label" style="color:var(--coral);">やりがちなNG例</span>
+          "教えて"だけ → 読み手・目的が不明で的外れな回答になる
+        </div>
+        <p class="desc">誰に・何のために・どんな条件かを伝えることで、的外れな回答がなくなります。</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── P2: テクニック詳細 ── -->
+<section id="p2">
+  <div class="sec-header reveal">
+    <div class="sec-num" style="background:var(--gold);">01</div>
+    <div class="sec-title-block">
+      <h2>3つのテクニック — 穴埋めプロンプトで今すぐ実践</h2>
+      <p>【 】を自分の情報に書き換えて、そのままClaudeに貼り付けてください。</p>
+    </div>
+  </div>
+
+  <div class="tech-list">
+
+    <!-- テクニック01 -->
+    <div class="tech-card">
+      <div class="tech-card-header" style="background:var(--gold-dim);border-left:5px solid var(--gold);">
+        <div class="t-num" style="background:var(--gold);">01</div>
+        <div>
+          <h3>ロール設定 <span class="en gold">Role Prompting</span></h3>
+        </div>
+        <span class="tag gold" style="border-color:var(--gold);margin-left:auto;">専門知識・アドバイスが欲しいとき</span>
+      </div>
+      <div class="tech-card-body">
+        <div class="tech-col">
+          <h4 class="gold">なぜ効果があるのか</h4>
+          <p>AIに「役割」を与えると、同じ質問でも回答の専門性が劇的に変わります。「教えて」と頼むより「あなたは専門家です、教えて」と伝えるだけでプロ目線の回答が返ってきます。</p>
+        </div>
+        <div class="tech-col">
+          <h4 class="gold">穴埋めプロンプトテンプレート</h4>
+          <div class="prompt-box">
+            <span class="p-line">あなたは<span class="hl" style="color:var(--gold);">【業界・職種（例：10年経験の人事コンサル）】</span>の専門家です。</span>
+            <span class="p-line"><span class="hl" style="color:var(--gold);">【質問・依頼（例：離職率を下げる施策を教えてください）】</span>について、</span>
+            <span class="p-line"><span class="hl" style="color:var(--gold);">【対象（例：従業員30名以下の中小企業）】</span>向けに、</span>
+            <span class="p-line"><span class="hl" style="color:var(--gold);">【形式（例：優先度の高い順に3つ）】</span>でご回答ください。</span>
+          </div>
+        </div>
+        <div class="tech-col">
+          <h4 class="gold">使用例</h4>
+          <div class="example-box">あなたは採用コンサルです。面接で応募者の「主体性」を見抜くための質問を5つ、各質問で何がわかるか解説付きで教えてください。</div>
+          <div class="tip-box">
+            <span class="tip-label">使いこなしのコツ</span>
+            役割は具体的なほど効果的です。「専門家」よりも「10年経験の〇〇コンサル」のように詳しく伝えましょう。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- テクニック02 -->
+    <div class="tech-card">
+      <div class="tech-card-header" style="background:var(--blue-dim);border-left:5px solid var(--blue);">
+        <div class="t-num" style="background:var(--blue);">02</div>
+        <div>
+          <h3>出力形式の指定 <span class="en blue">Format Control</span></h3>
+        </div>
+        <span class="tag blue" style="border-color:var(--blue);margin-left:auto;">資料・メール・報告書をすぐ仕上げたいとき</span>
+      </div>
+      <div class="tech-card-body">
+        <div class="tech-col">
+          <h4 class="blue">なぜ効果があるのか</h4>
+          <p>AIはデフォルトでは文章で回答します。形式を先に指定することで、整形不要・そのまま使える成果物が出てきます。「後から直す手間」がなくなり、作業時間が大幅に短縮できます。</p>
+        </div>
+        <div class="tech-col">
+          <h4 class="blue">穴埋めプロンプトテンプレート</h4>
+          <div class="prompt-box">
+            <span class="p-line"><span class="hl" style="color:var(--blue);">【目的（例：取締役会への新サービス導入の稟議）】</span>のために、</span>
+            <span class="p-line"><span class="hl" style="color:var(--blue);">【内容（例：クラウド会計ツール導入の提案）】</span>を</span>
+            <span class="p-line"><span class="hl" style="color:var(--blue);">【形式（例：A4 1枚・表形式・メリット/コスト/リスクの3列）】</span>で</span>
+            <span class="p-line"><span class="hl" style="color:var(--blue);">【条件（例：専門用語を避けて、3分で読める内容に）】</span>まとめてください。</span>
+          </div>
+        </div>
+        <div class="tech-col">
+          <h4 class="blue">使用例</h4>
+          <div class="example-box">新しい勤怠管理システム導入の稟議資料を、A4 1枚・表形式で。「現状の課題／改善内容／期待効果／導入コスト」の4列でお願いします。</div>
+          <div class="tip-box">
+            <span class="tip-label">使いこなしのコツ</span>
+            「A4 1枚」「表形式」のように、読み手とフォーマットをセットで伝えると、そのまま使える成果物になります。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- テクニック03 -->
+    <div class="tech-card">
+      <div class="tech-card-header" style="background:var(--teal-dim);border-left:5px solid var(--teal);">
+        <div class="t-num" style="background:var(--teal);">03</div>
+        <div>
+          <h3>壁打ち（批評家モード） <span class="en teal">Devil's Advocate</span></h3>
+        </div>
+        <span class="tag teal" style="border-color:var(--teal);margin-left:auto;">企画・提案を上司や顧客に出す前の最終確認に</span>
+      </div>
+      <div class="tech-card-body">
+        <div class="tech-col">
+          <h4 class="teal">なぜ効果があるのか</h4>
+          <p>AIを「批評家」として使うと、自分では気づかない弱点や反論を事前に発見できます。上司・クライアントに提案する前の最終チェックとして活用することで、提案の通過率が大きく上がります。</p>
+        </div>
+        <div class="tech-col">
+          <h4 class="teal">穴埋めプロンプトテンプレート</h4>
+          <div class="prompt-box">
+            <span class="p-line">あなたは厳しいが的確な<span class="hl" style="color:var(--teal);">【役割（例：経営コンサル）】</span>です。</span>
+            <span class="p-line">以下の<span class="hl" style="color:var(--teal);">【企画書・提案・アイデア】</span>について：</span>
+            <span class="p-line">(1) 弱点を<span class="hl" style="color:var(--teal);">【N（例：3）】</span>つ、具体的に指摘してください</span>
+            <span class="p-line">(2) 各弱点への改善案を提示してください</span>
+            <span class="p-line">(3) この企画が通る確率を10段階で評価し、10にする方法を教えてください</span>
+            <span class="p-line"><span class="hl" style="color:var(--teal);">【企画書・提案内容をここに貼り付けてください】</span></span>
+          </div>
+        </div>
+        <div class="tech-col">
+          <h4 class="teal">使用例</h4>
+          <div class="example-box">あなたは厳しい投資家です。この新規事業計画の弱点を3つ指摘し、改善案と「このまま提出した場合の承認確率（10段階）」を教えてください。</div>
+          <div class="tip-box">
+            <span class="tip-label">使いこなしのコツ</span>
+            「弱点→改善案→確率評価」の3ステップで依頼することで、批評が具体的なアクションプランに変わります。
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── P3: Gemini vs Claude ── -->
+<section id="p3">
+  <div class="sec-header reveal">
+    <div class="sec-num" style="background:var(--blue);">02</div>
+    <div class="sec-title-block">
+      <h2>Gemini vs Claude — 使い分け完全ガイド</h2>
+      <p>2つのAIの特性を理解して使い分けることで、作業の質とスピードが大きく変わります。</p>
+    </div>
+  </div>
+
+  <div class="lead-box reveal" style="border-left-color:var(--blue);">
+    <h3 style="color:var(--blue);">なぜ「使い分け」が必要なのか？</h3>
+    <p>GeminiはGoogle検索と連動した「情報収集型」AIです。一方、Claudeは深く考える「分析・生成・壁打ち型」AIです。この2つを使い分けるだけで、作業の質と効率が大きく変わります。「最新情報を調べたい」→ Gemini、「資料を分析・文章を作る・壁打ちしたい」→ Claudeと覚えましょう。</p>
+  </div>
+
+  <div class="vs-layout reveal">
+    <div>
+      <div class="ai-labels">
+        <div class="ai-label" style="background:var(--blue-dim);color:var(--blue);">Gemini <span>検索・情報収集型</span></div>
+        <div class="ai-label" style="background:var(--teal-dim);color:var(--teal);">Claude <span>分析・生成・壁打ち型</span></div>
+      </div>
+      <table class="vs-table">
+        <thead>
+          <tr>
+            <th style="width:32%">やりたいこと</th>
+            <th style="width:24%">Gemini</th>
+            <th style="width:24%">Claude</th>
+            <th style="width:20%">推奨</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="scene">最新ニュース・市場調査</td>
+            <td class="good">◎ 検索連動で最新情報を取得</td>
+            <td class="weak">△ 最新情報の取得は苦手</td>
+            <td><span class="rec-badge gemini">Gemini</span></td>
+          </tr>
+          <tr>
+            <td class="scene">議事録・長文の構造分析</td>
+            <td class="weak">△ 要約にとどまることが多い</td>
+            <td class="good">◎ 深い読み込みと多角的な分析</td>
+            <td><span class="rec-badge claude">Claude</span></td>
+          </tr>
+          <tr>
+            <td class="scene">営業メールの複数パターン作成</td>
+            <td class="weak">△ 単調になりやすい</td>
+            <td class="good">◎ 戦略的に3パターン同時作成</td>
+            <td><span class="rec-badge claude">Claude</span></td>
+          </tr>
+          <tr>
+            <td class="scene">企画書・稟議書の弱点チェック</td>
+            <td class="weak">△ 一般的な指摘にとどまる</td>
+            <td class="good">◎ 具体的な指摘＋改善案まで提示</td>
+            <td><span class="rec-badge claude">Claude</span></td>
+          </tr>
+          <tr>
+            <td class="scene">業務改善のROI試算</td>
+            <td class="weak">△ 一般論になりやすい</td>
+            <td class="good">◎ 具体ステップと数字で回答</td>
+            <td><span class="rec-badge claude">Claude</span></td>
+          </tr>
+          <tr>
+            <td class="scene">Google連携（Gmail等）</td>
+            <td class="good">◎ Workspaceとの統合が強み</td>
+            <td class="ok">○ API経由での連携が可能</td>
+            <td><span class="rec-badge gemini">Gemini</span></td>
+          </tr>
+          <tr>
+            <td class="scene">長期戦略・シナリオ思考</td>
+            <td class="weak">△ 表面的な分析にとどまる</td>
+            <td class="good">◎ 深い洞察と複数シナリオ提示</td>
+            <td><span class="rec-badge claude">Claude</span></td>
+          </tr>
+          <tr>
+            <td class="scene">文章の校正・リライト</td>
+            <td class="ok">○ 対応可能</td>
+            <td class="good">◎ 文脈を読んだ高精度な校正</td>
+            <td><span class="rec-badge claude">Claude</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="vs-right">
+      <div class="checklist-header">
+        <h3>迷ったときの選び方</h3>
+        <p>以下の目的に合わせて選びましょう。どちらも無料でお使いいただけます。</p>
+      </div>
+      <div class="check-item" style="border-color:var(--blue);">
+        <span>今日の最新情報が必要</span>
+        <span class="ans" style="background:var(--blue-dim);color:var(--blue);">Gemini</span>
+      </div>
+      <div class="check-item" style="border-color:var(--teal);">
+        <span>手持ち資料を深く分析したい</span>
+        <span class="ans" style="background:var(--teal-dim);color:var(--teal);">Claude</span>
+      </div>
+      <div class="check-item" style="border-color:var(--teal);">
+        <span>複数パターンの文章を作りたい</span>
+        <span class="ans" style="background:var(--teal-dim);color:var(--teal);">Claude</span>
+      </div>
+      <div class="check-item" style="border-color:var(--teal);">
+        <span>企画の弱点を洗い出したい</span>
+        <span class="ans" style="background:var(--teal-dim);color:var(--teal);">Claude</span>
+      </div>
+      <div class="check-item" style="border-color:var(--blue);">
+        <span>Gmail・Driveと連携したい</span>
+        <span class="ans" style="background:var(--blue-dim);color:var(--blue);">Gemini</span>
+      </div>
+      <div class="check-item" style="border-color:var(--teal);">
+        <span>戦略の壁打ちがしたい</span>
+        <span class="ans" style="background:var(--teal-dim);color:var(--teal);">Claude</span>
+      </div>
+      <div class="vs-tip">
+        <strong>まずはClaudeの「壁打ち」から始めてみてください。</strong><br>
+        慣れてきたらGeminiとClaudeを目的別に使い分けると、作業の質と効率がさらに上がります。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── P4: プロンプト集 ── -->
+<section id="p4">
+  <div class="sec-header reveal">
+    <div class="sec-num" style="background:var(--teal);color:var(--ink);">03</div>
+    <div class="sec-title-block">
+      <h2>コピペで使える 穴埋めプロンプト集</h2>
+      <p>【 】を自社・自分の情報に書き換えてClaudeに貼り付けてください。まずはそのまま試してみるのがおすすめです。</p>
+    </div>
+  </div>
+
+  <div class="prompt-grid">
+
+    <!-- #01 -->
+    <div class="prompt-card">
+      <div class="prompt-card-top" style="background:var(--blue);"></div>
+      <div class="prompt-card-inner">
+        <div class="p-header">
+          <span class="p-num blue">#01</span>
+          <h3 class="p-title">議事録の5層分析</h3>
+        </div>
+        <span class="tag blue" style="border-color:var(--blue);align-self:flex-start;">会議直後に</span>
+        <div class="prompt-content" style="--hl-col:var(--blue);">
+          <span class="p-line">以下の議事録を5つの視点で分析してください。</span>
+          <span class="p-line">(1) <span class="hl" style="color:var(--blue);">【会議名】</span>の3行要約</span>
+          <span class="p-line">(2) 決定事項と<span class="hl" style="color:var(--blue);">【担当者名】</span>の役割分担</span>
+          <span class="p-line">(3) 未決事項とリスク（優先度順）</span>
+          <span class="p-line">(4) 各参加者の本音・立場の推測</span>
+          <span class="p-line">(5) 次のアクション（誰が・いつまでに・何を）</span>
+          <span class="p-line"><span class="hl" style="color:var(--blue);">【議事録をここに貼り付けてください】</span></span>
+        </div>
+        <div class="prompt-divider"></div>
+        <div class="prompt-tip">
+          <span class="t-label" style="color:var(--blue);">使いこなしのコツ</span>
+          (4)「本音の推測」が特に有効です。会議後の根回しや次回の進め方のヒントになります。
+        </div>
+        <div class="prompt-result blue">▶ 会議の抜け漏れゼロ・アクション即明確に</div>
+      </div>
+    </div>
+
+    <!-- #02 -->
+    <div class="prompt-card">
+      <div class="prompt-card-top" style="background:var(--gold);"></div>
+      <div class="prompt-card-inner">
+        <div class="p-header">
+          <span class="p-num gold">#02</span>
+          <h3 class="p-title">営業メール 3パターン自動生成</h3>
+        </div>
+        <span class="tag gold" style="border-color:var(--gold);align-self:flex-start;">商談・提案前に</span>
+        <div class="prompt-content">
+          <span class="p-line"><span class="hl" style="color:var(--gold);">【商品・サービス名と概要】</span>の提案メールを</span>
+          <span class="p-line"><span class="hl" style="color:var(--gold);">【ターゲット（例：IT企業の人事部長）】</span>向けに</span>
+          <span class="p-line">3パターン作成してください。</span>
+          <span class="p-line">A：課題訴求型（悩みに直接刺さる内容）</span>
+          <span class="p-line">B：数字で語る型（ROI・実績を前面に）</span>
+          <span class="p-line">C：ストーリー型（成功事例を軸に）</span>
+          <span class="p-line">各パターンに「件名・本文・狙い」を明記。</span>
+        </div>
+        <div class="prompt-divider"></div>
+        <div class="prompt-tip">
+          <span class="t-label" style="color:var(--gold);">使いこなしのコツ</span>
+          3パターン出すことで「最適」を選べます。相手の性格に合わせてA〜Cを使い分けましょう。
+        </div>
+        <div class="prompt-result gold">▶ 返信率・商談化率が明確に変わります</div>
+      </div>
+    </div>
+
+    <!-- #03 -->
+    <div class="prompt-card">
+      <div class="prompt-card-top" style="background:var(--teal);"></div>
+      <div class="prompt-card-inner">
+        <div class="p-header">
+          <span class="p-num teal">#03</span>
+          <h3 class="p-title">業務フロー改善の提案書</h3>
+        </div>
+        <span class="tag teal" style="border-color:var(--teal);align-self:flex-start;">業務改善・社内提案に</span>
+        <div class="prompt-content">
+          <span class="p-line">あなたは業務改善のコンサルタントです。</span>
+          <span class="p-line">現状フロー：<span class="hl" style="color:var(--teal);">【業務の流れを箇条書きで】</span></span>
+          <span class="p-line">課題：<span class="hl" style="color:var(--teal);">【ムダ・ミス・時間がかかる部分】</span></span>
+          <span class="p-line">改善提案を以下の形式でまとめてください。</span>
+          <span class="p-line">(1) 改善案（具体的なステップ）</span>
+          <span class="p-line">(2) 削減できる時間・コストの概算</span>
+          <span class="p-line">(3) 導入時の注意点と想定されるハードル</span>
+        </div>
+        <div class="prompt-divider"></div>
+        <div class="prompt-tip">
+          <span class="t-label" style="color:var(--teal);">使いこなしのコツ</span>
+          (2)の「時間・コスト削減の試算」を入れると稟議が通りやすくなります。数字が説得力になります。
+        </div>
+        <div class="prompt-result teal">▶ 改善案＋ROI試算付きで提出できます</div>
+      </div>
+    </div>
+
+    <!-- #04 -->
+    <div class="prompt-card">
+      <div class="prompt-card-top" style="background:var(--coral);"></div>
+      <div class="prompt-card-inner">
+        <div class="p-header">
+          <span class="p-num coral">#04</span>
+          <h3 class="p-title">部下・新人への指導メモ</h3>
+        </div>
+        <span class="tag coral" style="border-color:var(--coral);align-self:flex-start;">マネジメント・育成に</span>
+        <div class="prompt-content">
+          <span class="p-line">あなたは丁寧で的確な指導者です。</span>
+          <span class="p-line"><span class="hl" style="color:var(--coral);">【部下の役職（例：入社3年目の営業担当）】</span>が</span>
+          <span class="p-line"><span class="hl" style="color:var(--coral);">【ミスや課題の内容】</span>をしました。</span>
+          <span class="p-line">本人を責めず成長につながるフィードバックを：</span>
+          <span class="p-line">(1) 客観的な事実の整理</span>
+          <span class="p-line">(2) 具体的な改善アドバイス（3つ）</span>
+          <span class="p-line">(3) 次回への期待を込めた前向きな一言</span>
+        </div>
+        <div class="prompt-divider"></div>
+        <div class="prompt-tip">
+          <span class="t-label" style="color:var(--coral);">使いこなしのコツ</span>
+          「責めない言い方で」と指定することで、感情的にならずに建設的なフィードバックが書けます。
+        </div>
+        <div class="prompt-result coral">▶ 部下との関係を壊さず改善を促せます</div>
+      </div>
+    </div>
+
+    <!-- #05 -->
+    <div class="prompt-card">
+      <div class="prompt-card-top" style="background:var(--violet);"></div>
+      <div class="prompt-card-inner">
+        <div class="p-header">
+          <span class="p-num violet">#05</span>
+          <h3 class="p-title">SNS・社内報の投稿文量産</h3>
+        </div>
+        <span class="tag violet" style="border-color:var(--violet);align-self:flex-start;">マーケティング・広報に</span>
+        <div class="prompt-content">
+          <span class="p-line"><span class="hl" style="color:var(--violet);">【テーマ・伝えたい内容】</span>について</span>
+          <span class="p-line"><span class="hl" style="color:var(--violet);">【ターゲット（例：30代・中小企業経営者）】</span>に</span>
+          <span class="p-line">刺さるSNS投稿文を3パターン作成してください。</span>
+          <span class="p-line">文字数：<span class="hl" style="color:var(--violet);">【例：140文字以内】</span></span>
+          <span class="p-line">(1) 問いかけ型（共感・コメントを引き出す）</span>
+          <span class="p-line">(2) 数字・実績型（信頼性・説得力を高める）</span>
+          <span class="p-line">(3) ストーリー型（記憶に残りやすい）</span>
+          <span class="p-line">各パターンにハッシュタグ3つも添えてください。</span>
+        </div>
+        <div class="prompt-divider"></div>
+        <div class="prompt-tip">
+          <span class="t-label" style="color:var(--violet);">使いこなしのコツ</span>
+          毎週の投稿をAIで量産する使い方が効果的です。型を指定することでアルゴリズムに強いパターンを選べます。
+        </div>
+        <div class="prompt-result violet">▶ 投稿作成時間が10分から2分以下に短縮</div>
+      </div>
+    </div>
+
+    <!-- #06 -->
+    <div class="prompt-card">
+      <div class="prompt-card-top" style="background:var(--green);"></div>
+      <div class="prompt-card-inner">
+        <div class="p-header">
+          <span class="p-num green">#06</span>
+          <h3 class="p-title">データ分析の経営コメント生成</h3>
+        </div>
+        <span class="tag green" style="border-color:var(--green);align-self:flex-start;">経営報告・取締役会資料に</span>
+        <div class="prompt-content">
+          <span class="p-line">以下の<span class="hl" style="color:var(--green);">【売上・KPI・アンケート等のデータ】</span>を分析し、</span>
+          <span class="p-line">経営報告用コメントを以下の構成で作成してください。</span>
+          <span class="p-line">(1) 注目すべき数値とその意味・背景</span>
+          <span class="p-line">(2) 良い点（継続・強化すべきこと）</span>
+          <span class="p-line">(3) 課題と改善の優先度（高・中・低）</span>
+          <span class="p-line">(4) 来月・来期に向けた具体的な提言</span>
+          <span class="p-line">読み手：<span class="hl" style="color:var(--green);">【役員・取締役会等】</span>向けに簡潔に。</span>
+          <span class="p-line"><span class="hl" style="color:var(--green);">【データをここに貼り付けてください】</span></span>
+        </div>
+        <div class="prompt-divider"></div>
+        <div class="prompt-tip">
+          <span class="t-label" style="color:var(--green);">使いこなしのコツ</span>
+          Excelの数値を貼り付けるだけで意味のある解釈に変換してくれます。報告書の作成時間が大幅に削減できます。
+        </div>
+        <div class="prompt-result green">▶ 数字の羅列が意思決定できる報告書に変わります</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- フッター -->
+<footer>
+  <span>YeLLOWS Inc.  |  AI活用ウェビナー参加者限定特典</span>
+  <span class="gold">関本大輔</span>
+</footer>
+
+<script>
+// スクロールアニメーション
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      // 子要素の principle-card / tech-card / prompt-card にも適用
+      e.target.querySelectorAll('.principle-card, .tech-card, .prompt-card').forEach((el,i) => {
+        el.style.animationDelay = `${i * 0.08}s`;
+        el.style.animationPlayState = 'running';
+      });
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// カードを初期状態では止めておき、スクロール時に動かす
+document.querySelectorAll('.principle-card, .tech-card, .prompt-card').forEach(el => {
+  el.style.animationPlayState = 'paused';
+});
+
+// セクション全体を監視してカードを起動
+document.querySelectorAll('section').forEach(sec => {
+  const obs2 = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.principle-card, .tech-card, .prompt-card').forEach((el,i) => {
+          setTimeout(() => { el.style.animationPlayState = 'running'; }, i * 80);
+        });
+        obs2.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.05 });
+  obs2.observe(sec);
+});
+</script>
+
+</body>
+</html>
