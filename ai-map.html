@@ -1,0 +1,2252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>あなたの業務を削減します。— AI導入マップ | YeLLOWS DX</title>
+<meta name="description" content="御社の業務をAIでどれだけ削減できるか、3分で診断。YeLLOWS DXのAI導入マップ事前ヒアリングツール。">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; -webkit-font-smoothing: antialiased; }
+#root { min-height: 100vh; }
+</style>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const { useState, useCallback, useEffect, useRef } = React;
+
+// Storage helpers (localStorage)
+window.storage = window.storage || {
+  async get(key) {
+    try { const v = localStorage.getItem(key); return v ? { value: v } : null; } catch { return null; }
+  },
+  async set(key, value) {
+    try { localStorage.setItem(key, value); return { key, value }; } catch { return null; }
+  },
+  async delete(key) {
+    try { localStorage.removeItem(key); return { key, deleted: true }; } catch { return null; }
+  },
+};
+
+const YELLOWS_LOGO = "data:image/jpeg;base64,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ofAL/kp8H/XrN/IV5fXq/wCz5bGb4ktIM4gsJZD+JVf/AGagD6oooooAKKKKACiiigAooooAK+SPjp/yVfUv+uUH/ota+t6+WPi7omq658XtSg0vT7q9l8qDKwRF8fu1646D60AeT13Hwf8A+SraB/11f/0W9dHoX7P3irUtj6nNa6VCeodvNlx/urx+bCvWfB3wX0DwhqVtqgubu91G3yUkkYIikggkIPYnqTQB6XRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVm6loWlazGE1TTbO9XGALiBZMfTI4rSooAgt7aK0tYraCMJDCgjjReiqBgD8qnoooAK8T+M/wtl1vzPE+hW++/RP9MtkHMygcOo7uBwR3AGORz7ZRQB8AkY4pK+q/iD8GNK8WPLqWmOmm6s2WZgv7mc/7YHQ/7Q98g188+JvAviLwjOy6vps0cQOFuEG+FvTDjj8Dg+1AHNUUUUAFfQX7N2issWta7IuEYpaRN64+Z/5pXivh/wAP6l4n1iDTNKtjNcynsPlRe7MewHr/AFr7J8JeG7bwl4ZsdFtTuW3T55McyOeWb8ST9BgUAb1FFFABRRRQAUUUUAFFFFABTQACSB1606igAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACmPGkiMjqGRhgqRkEU+igDh9X+EvgfWCzzaDDBIR9+0Jg/HCkL+YrFi+AHgiOfzGj1CVf+eb3Py/oAf1r1KigDH0Lwzovhm0Nro+mwWkR5byx8z/7zHlvxJrYoooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/Z";
+const BRAND = {
+  black: "#1A1A1A",
+  dark: "#2A2A2A",
+  gold: "#FFD600",
+  white: "#FFFFFF",
+  gray: "#999999",
+  lightBg: "#F5F5F0",
+  cardBg: "#FAFAFA",
+  green: "#4CAF50",
+  blue: "#2196F3",
+  orange: "#FF9800",
+  red: "#E53935"
+};
+const INDUSTRIES = ["製造業", "建設業", "サービス業", "IT・通信", "小売・卸売業", "飲食業", "医療・福祉", "教育", "不動産", "デザイン・クリエイティブ", "コンサルティング", "運輸・物流", "その他"];
+const EMPLOYEE_RANGES = ["5名以下", "6〜15名", "16〜30名", "31〜50名", "51〜100名", "101名以上"];
+const ROLES = ["代表取締役・社長", "取締役・役員", "部長・マネージャー", "課長・リーダー", "一般社員", "その他"];
+const AI_USAGE_OPTIONS = [{
+  value: "none",
+  label: "まだ使っていない"
+}, {
+  value: "tried",
+  label: "少し触ったことがある"
+}, {
+  value: "personal",
+  label: "個人的に日常的に使っている"
+}, {
+  value: "company",
+  label: "会社として一部導入済み"
+}];
+const EXPECTATIONS = ["自分の業務を速くする方法", "社員にどうAIを使わせるか", "助成金の活用方法", "AI導入の優先順位の決め方", "実際にAIで何かを作ってみたい"];
+const PRI = {
+  high: {
+    label: "最優先",
+    bg: BRAND.red
+  },
+  medium: {
+    label: "高",
+    bg: BRAND.orange
+  },
+  low: {
+    label: "中",
+    bg: BRAND.blue
+  }
+};
+const DIFF = {
+  easy: "低",
+  medium: "中",
+  hard: "高"
+};
+
+/* ──── Storage helpers ──── */
+const STORAGE_KEY = "ai-map-hearing-v2";
+async function loadState() {
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    return r ? JSON.parse(r.value) : null;
+  } catch {
+    return null;
+  }
+}
+async function saveState(state) {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state));
+  } catch {}
+}
+async function clearState() {
+  try {
+    await window.storage.delete(STORAGE_KEY);
+  } catch {}
+}
+
+/* ──── API calls ──── */
+async function suggestSubTasks(categoryName, industry, employees) {
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `あなたは中小企業の業務コンサルタントです。
+
+業種: ${industry}
+社員数: ${employees}
+業務大項目: ${categoryName}
+
+この大項目に含まれる具体的な業務工程（中項目）を6〜8個提案してください。
+JSONのみ出力し、それ以外のテキストは一切含めないでください。
+
+[
+  {"name": "<業務工程名（10文字以内）>", "description": "<何をする工程か15文字以内>"},
+  ...
+]`
+        }]
+      })
+    });
+    const d = await res.json();
+    const txt = (d.content || []).map(c => c.text || "").join("").replace(/```json|```/g, "").trim();
+    return JSON.parse(txt);
+  } catch (e) {
+    console.error("suggest error", e);
+    return null;
+  }
+}
+async function analyzeSubTask(taskName, categoryName, industry, employees) {
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `あなたは中小企業のAI導入コンサルタントです。経営者に直接お伝えする前提で、丁寧な敬語（です・ます調）で回答してください。
+
+業種: ${industry}
+社員数: ${employees}
+業務大項目: ${categoryName}
+業務中項目: ${taskName}
+
+この業務工程のAI化分析をJSON形式のみで回答してください。
+
+重要な指示:
+- potentialReductionは、AIによる自動化・効率化の可能性を最大限に見積もり、インパクトのある数値（40〜80%の範囲）にしてください。経営者に「これは取り組む価値がある」と感じていただける数値が重要です。
+- reductionReasonとaiUseCasesは「AIで何をつくれるか・何を自動化できるか」に絞ってください。経営者の心構えや行動指針は不要です。
+- reductionReasonは、この業務のどの部分がなぜAIで削減できるのか、経営者が読んで納得できる根拠を自然な日本語で書いてください。毎回同じ言い回しにならないよう、業務内容に応じて表現を変えてください。
+- aiUseCasesは、この業務でAIを使って具体的に何がつくれるか（自動化ツール、生成の仕組み、分析レポートなど）を、その業務ならではの切り口で自然に提案してください。「〜をAIでつくりましょう」に限らず、「〜が自動で出来上がります」「〜をAIに任せられます」など、業務に合った言い方で構いません。
+- 絶対にソフト名・ツール名・サービス名（ChatGPT、Claude、Gemini、Notion等）を入れないでください。「AI」とだけ表現してください。
+
+{
+  "hoursPerPersonPerMonth": <一人当たりの月間推定工数（時間）数値のみ>,
+  "estimatedPeople": <関わる推定人数 数値のみ>,
+  "aiEffect": <5段階（1-5）のAI化効果 数値のみ>,
+  "priority": "<high/medium/low>",
+  "difficulty": "<easy/medium/hard>",
+  "potentialReduction": <AI化で削減できる推定%（40-80）数値のみ。インパクトある数値に>,
+  "reductionReason": "<この業務がなぜAIで削減できるかの根拠。自然な日本語で。60文字以内>",
+  "aiUseCases": "<AIで具体的に何がつくれるかの提案。業務に合った自然な表現で。70文字以内>"
+}`
+        }]
+      })
+    });
+    const d = await res.json();
+    const txt = (d.content || []).map(c => c.text || "").join("").replace(/```json|```/g, "").trim();
+    return JSON.parse(txt);
+  } catch (e) {
+    console.error("analyze error", e);
+    return null;
+  }
+}
+async function solveConcern(taskName, categoryName, industry, concern) {
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `あなたは中小企業のAI導入コンサルタントです。経営者に直接お伝えする前提で、丁寧な敬語（です・ます調）で回答してください。
+
+業種: ${industry}
+業務: ${categoryName} > ${taskName}
+AI導入に対する懸念: ${concern}
+
+この懸念に対して、具体的な解決アプローチをJSON形式のみで回答してください。
+経営者が「なるほど、それなら大丈夫かも」と思えるレベルで具体的に。
+
+重要な指示:
+- 絶対にソフト名・ツール名・サービス名（ChatGPT、Claude、Gemini、Notion等）を入れないでください。「AI」とだけ表現してください。
+- AIで何をつくれば・どう仕組み化すれば解決するかに絞ってください。毎回同じ言い回しにならないよう、懸念の内容に応じて自然な表現で回答してください。
+
+{
+  "solution": "<この懸念をAIでどう解決できるかの提案。自然な日本語で。80文字以内>",
+  "method": "<AIを使った具体的な仕組み・やり方。自然な表現で。50文字以内>",
+  "checkProcess": "<人間が確認すべきポイント。自然な表現で。50文字以内>",
+  "timeToCheck": "<チェックにかかる推定時間。例: 従来の1/5（月2時間→約25分）になります>"
+}`
+        }]
+      })
+    });
+    const d = await res.json();
+    const txt = (d.content || []).map(c => c.text || "").join("").replace(/```json|```/g, "").trim();
+    return JSON.parse(txt);
+  } catch (e) {
+    console.error("concern error", e);
+    return null;
+  }
+}
+
+/* ──── Small Components ──── */
+function Stars({
+  v,
+  max = 5
+}) {
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      letterSpacing: 1
+    }
+  }, Array.from({
+    length: max
+  }, (_, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    style: {
+      color: i < v ? BRAND.gold : "#DDD",
+      fontSize: 14
+    }
+  }, "\u2605")));
+}
+function StepBar({
+  current,
+  total = 5
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 4,
+      marginBottom: 24
+    }
+  }, Array.from({
+    length: total
+  }, (_, i) => {
+    const s = i + 1,
+      active = s === current,
+      done = s < current;
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 4
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 28,
+        height: 28,
+        borderRadius: "50%",
+        background: active ? BRAND.gold : done ? BRAND.green : "#E0E0E0",
+        color: active ? BRAND.black : done ? BRAND.white : BRAND.gray,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 12,
+        fontWeight: 700
+      }
+    }, done ? "✓" : s), i < total - 1 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 28,
+        height: 2,
+        background: done ? BRAND.green : "#E0E0E0"
+      }
+    }));
+  }));
+}
+function Btn({
+  children,
+  onClick,
+  disabled,
+  variant = "primary",
+  style: s
+}) {
+  const p = variant === "primary";
+  return /*#__PURE__*/React.createElement("button", {
+    onClick: onClick,
+    disabled: disabled,
+    style: {
+      padding: "11px 28px",
+      fontSize: 14,
+      fontWeight: 700,
+      border: p ? "none" : `2px solid ${BRAND.dark}`,
+      borderRadius: 8,
+      cursor: disabled ? "not-allowed" : "pointer",
+      background: disabled ? "#CCC" : p ? BRAND.gold : "transparent",
+      color: disabled ? "#888" : BRAND.black,
+      opacity: disabled ? 0.6 : 1,
+      ...s
+    }
+  }, children);
+}
+
+/* ──── Category Card (STEP 2) ──── */
+function CategoryCard({
+  cat,
+  catIdx,
+  industry,
+  employees,
+  onUpdate,
+  onRemove
+}) {
+  const [newCustom, setNewCustom] = useState("");
+  const [suggesting, setSuggesting] = useState(false);
+  const suggestingRef = useRef(false);
+  useEffect(() => {
+    if (!cat.name || cat.suggested || suggestingRef.current) return;
+    let cancelled = false;
+    suggestingRef.current = true;
+    setSuggesting(true);
+    const catName = cat.name;
+    (async () => {
+      const suggestions = await suggestSubTasks(catName, industry, employees);
+      if (cancelled) return;
+      if (suggestions) {
+        onUpdate(catIdx, prev => ({
+          ...prev,
+          suggested: true,
+          subTasks: suggestions.map(s => ({
+            name: s.name,
+            description: s.description,
+            selected: false,
+            analysis: null,
+            loading: false
+          }))
+        }));
+      } else {
+        onUpdate(catIdx, prev => ({
+          ...prev,
+          suggested: true,
+          subTasks: []
+        }));
+      }
+      suggestingRef.current = false;
+      setSuggesting(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [cat.name, cat.suggested]);
+  const toggleSub = async subIdx => {
+    const sub = cat.subTasks[subIdx];
+    const newSelected = !sub.selected;
+    const needsAnalysis = newSelected && !sub.analysis;
+    onUpdate(catIdx, {
+      ...cat,
+      subTasks: cat.subTasks.map((s, i) => i === subIdx ? {
+        ...s,
+        selected: newSelected,
+        loading: needsAnalysis
+      } : s)
+    });
+    if (needsAnalysis) {
+      const result = await analyzeSubTask(sub.name, cat.name, industry, employees);
+      // Use functional-style: read latest from parent via onUpdate with callback
+      onUpdate(catIdx, prev => ({
+        ...prev,
+        subTasks: prev.subTasks.map((s, i) => i === subIdx ? {
+          ...s,
+          analysis: result || defaultAnalysis(),
+          loading: false
+        } : s)
+      }));
+    }
+  };
+  const addCustomSub = async () => {
+    if (!newCustom.trim()) return;
+    const name = newCustom.trim();
+    const newSub = {
+      name,
+      description: "カスタム追加",
+      selected: true,
+      analysis: null,
+      loading: true
+    };
+    setNewCustom("");
+    onUpdate(catIdx, {
+      ...cat,
+      subTasks: [...cat.subTasks, newSub]
+    });
+    const result = await analyzeSubTask(name, cat.name, industry, employees);
+    onUpdate(catIdx, prev => ({
+      ...prev,
+      subTasks: prev.subTasks.map(s => s.name === name && s.loading ? {
+        ...s,
+        analysis: result || defaultAnalysis(),
+        loading: false
+      } : s)
+    }));
+  };
+  const updateSubField = (subIdx, field, value) => {
+    onUpdate(catIdx, {
+      ...cat,
+      subTasks: cat.subTasks.map((s, i) => i === subIdx ? {
+        ...s,
+        analysis: {
+          ...s.analysis,
+          [field]: value
+        }
+      } : s)
+    });
+  };
+  const selectedCount = cat.subTasks.filter(s => s.selected).length;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.white,
+      borderRadius: 12,
+      marginBottom: 16,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.dark,
+      padding: "12px 16px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: BRAND.gold,
+      fontSize: 16,
+      fontWeight: 800
+    }
+  }, cat.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: BRAND.gray,
+      fontSize: 11,
+      marginTop: 2
+    }
+  }, suggesting ? "AIが業務工程を分析中..." : `${selectedCount}件選択中`)), /*#__PURE__*/React.createElement("button", {
+    onClick: () => onRemove(catIdx),
+    style: {
+      background: "none",
+      border: "none",
+      color: BRAND.gray,
+      fontSize: 20,
+      cursor: "pointer"
+    }
+  }, "\xD7")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 16
+    }
+  }, selectedCount > 0 && !suggesting && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#FFF9E0",
+      border: `1px solid ${BRAND.gold}`,
+      borderRadius: 8,
+      padding: "8px 12px",
+      marginBottom: 12,
+      fontSize: 11,
+      color: BRAND.dark,
+      lineHeight: 1.6
+    }
+  }, "\uD83D\uDCA1 ", /*#__PURE__*/React.createElement("strong", null, "\u4E00\u4EBA\u5F53\u305F\u308A\u306E\u6642\u9593"), "\u3068", /*#__PURE__*/React.createElement("strong", null, "\u4EBA\u6570"), "\u3092\u304A\u304A\u3088\u305D\u3067\u5165\u529B\u3057\u3066\u307F\u3066\u304F\u3060\u3055\u3044\u3002\u6708\u9593\u306E\u5408\u8A08\u5DE5\u6570\u3068\u524A\u6E1B\u30B3\u30B9\u30C8\u304C\u81EA\u52D5\u3067\u8A08\u7B97\u3055\u308C\u307E\u3059\u3002", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: BRAND.gray
+    }
+  }, "\uFF08\u6570\u5B57\u306F\u3042\u3068\u304B\u3089\u81EA\u7531\u306B\u4FEE\u6B63\u3067\u304D\u307E\u3059\uFF09")), suggesting && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: 20,
+      color: BRAND.gold,
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      animation: "spin 1s linear infinite",
+      display: "inline-block",
+      marginRight: 8
+    }
+  }, "\u27F3"), "\u300C", cat.name, "\u300D\u306E\u696D\u52D9\u5DE5\u7A0B\u3092AI\u304C\u63D0\u6848\u4E2D..."), !suggesting && cat.subTasks.map((sub, sIdx) => /*#__PURE__*/React.createElement("div", {
+    key: sIdx,
+    style: {
+      borderBottom: "1px solid #F0F0F0",
+      padding: "10px 0"
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "flex-start",
+      gap: 10,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: sub.selected,
+    onChange: () => toggleSub(sIdx),
+    style: {
+      accentColor: BRAND.gold,
+      marginTop: 3,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: BRAND.dark
+    }
+  }, sub.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: BRAND.gray
+    }
+  }, sub.description)), sub.loading && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: BRAND.gold,
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      animation: "spin 1s linear infinite",
+      display: "inline-block"
+    }
+  }, "\u27F3"), " \u5206\u6790\u4E2D..."), sub.selected && sub.analysis && !sub.loading && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center",
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "baseline",
+      gap: 2,
+      background: "#F5F5F0",
+      padding: "3px 8px",
+      borderRadius: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u4E00\u4EBA"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: sub.analysis.hoursPerPersonPerMonth,
+    onChange: e => updateSubField(sIdx, "hoursPerPersonPerMonth", Number(e.target.value)),
+    onClick: e => e.stopPropagation(),
+    style: {
+      width: 34,
+      fontSize: 16,
+      fontWeight: 700,
+      color: BRAND.dark,
+      border: "none",
+      borderBottom: `2px dashed #DDD`,
+      background: "transparent",
+      textAlign: "center",
+      outline: "none"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u6642\u9593/\u6708"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: BRAND.gray,
+      margin: "0 2px"
+    }
+  }, "\xD7"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: sub.analysis.estimatedPeople,
+    onChange: e => updateSubField(sIdx, "estimatedPeople", Number(e.target.value)),
+    onClick: e => e.stopPropagation(),
+    style: {
+      width: 28,
+      fontSize: 16,
+      fontWeight: 700,
+      color: BRAND.dark,
+      border: "none",
+      borderBottom: `2px dashed #DDD`,
+      background: "transparent",
+      textAlign: "center",
+      outline: "none"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u540D"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: BRAND.gray,
+      margin: "0 2px"
+    }
+  }, "="), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      fontWeight: 800,
+      color: BRAND.dark
+    }
+  }, (sub.analysis.hoursPerPersonPerMonth || 0) * (sub.analysis.estimatedPeople || 0)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u6642\u9593/\u6708")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "baseline",
+      gap: 2,
+      background: "#E8F5E9",
+      padding: "3px 8px",
+      borderRadius: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: BRAND.green,
+      fontWeight: 600
+    }
+  }, "AI\u524A\u6E1B"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18,
+      fontWeight: 800,
+      color: BRAND.green
+    }
+  }, sub.analysis.potentialReduction), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: BRAND.green,
+      fontWeight: 600
+    }
+  }, "%")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      padding: "2px 8px",
+      borderRadius: 8,
+      background: PRI[sub.analysis.priority]?.bg || BRAND.gray,
+      color: BRAND.white
+    }
+  }, PRI[sub.analysis.priority]?.label || "-"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u96E3\u6613\u5EA6: ", DIFF[sub.analysis.difficulty] || "-")), sub.analysis.reductionReason && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: BRAND.dark,
+      background: "#E8F5E9",
+      padding: "6px 10px",
+      borderRadius: 5,
+      marginTop: 6,
+      borderLeft: `3px solid ${BRAND.green}`,
+      lineHeight: 1.6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      color: BRAND.green,
+      marginRight: 4
+    }
+  }, "\uD83D\uDCCA \u524A\u6E1B\u306E\u6839\u62E0:"), sub.analysis.reductionReason), sub.analysis.aiUseCases && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#555",
+      background: BRAND.lightBg,
+      padding: "6px 10px",
+      borderRadius: 5,
+      marginTop: 4,
+      lineHeight: 1.6
+    }
+  }, "\uD83D\uDCA1 ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 600
+    }
+  }, "\u6D3B\u7528\u30A4\u30E1\u30FC\u30B8:"), " ", sub.analysis.aiUseCases)))))), !suggesting && cat.suggested && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: newCustom,
+    onChange: e => setNewCustom(e.target.value),
+    onKeyDown: e => e.key === "Enter" && addCustomSub(),
+    placeholder: "\u4ED6\u306B\u3042\u308C\u3070\u8FFD\u52A0...",
+    style: {
+      flex: 1,
+      padding: "8px 12px",
+      fontSize: 13,
+      border: "1.5px solid #DDD",
+      borderRadius: 6,
+      outline: "none",
+      boxSizing: "border-box"
+    },
+    onFocus: e => e.target.style.borderColor = BRAND.gold,
+    onBlur: e => e.target.style.borderColor = "#DDD"
+  }), /*#__PURE__*/React.createElement(Btn, {
+    onClick: addCustomSub,
+    disabled: !newCustom.trim(),
+    style: {
+      padding: "8px 16px",
+      fontSize: 12
+    }
+  }, "\u8FFD\u52A0"))));
+}
+function defaultAnalysis() {
+  return {
+    hoursPerPersonPerMonth: 8,
+    estimatedPeople: 2,
+    aiEffect: 3,
+    priority: "medium",
+    difficulty: "medium",
+    potentialReduction: 40,
+    reductionReason: "定型業務の自動処理アプリをAIでつくりましょう",
+    aiUseCases: "業務データの自動整理・レポート生成ツールをAIでつくりましょう"
+  };
+}
+
+/* ──── Main App ──── */
+function AIMapHearingV2() {
+  const [step, setStep] = useState(1);
+  const [company, setCompany] = useState({
+    name: "",
+    personName: "",
+    role: "",
+    industry: "",
+    employees: ""
+  });
+  const [categories, setCategories] = useState([]);
+  const [newCatName, setNewCatName] = useState("");
+  const [aiUsage, setAiUsage] = useState("");
+  const [expectations, setExpectations] = useState([]);
+  const [biggestPain, setBiggestPain] = useState("");
+  const [currentTools, setCurrentTools] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [showSaveMsg, setShowSaveMsg] = useState(false);
+  const saveTimer = useRef(null);
+
+  // Load on mount
+  useEffect(() => {
+    (async () => {
+      const saved = await loadState();
+      if (saved) {
+        if (saved.company) setCompany(saved.company);
+        if (saved.categories) setCategories(saved.categories);
+        if (saved.aiUsage) setAiUsage(saved.aiUsage);
+        if (saved.expectations) setExpectations(saved.expectations);
+        if (saved.biggestPain) setBiggestPain(saved.biggestPain);
+        if (saved.currentTools) setCurrentTools(saved.currentTools);
+        if (saved.step) setStep(saved.step);
+        if (saved.submitted) setSubmitted(saved.submitted);
+      }
+      setLoaded(true);
+    })();
+  }, []);
+
+  // Auto-save on changes
+  useEffect(() => {
+    if (!loaded) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(async () => {
+      await saveState({
+        company,
+        categories,
+        aiUsage,
+        expectations,
+        biggestPain,
+        currentTools,
+        step,
+        submitted
+      });
+      setShowSaveMsg(true);
+      setTimeout(() => setShowSaveMsg(false), 1500);
+    }, 800);
+  }, [company, categories, aiUsage, expectations, biggestPain, currentTools, step, submitted, loaded]);
+  const addCategory = () => {
+    if (!newCatName.trim() || categories.length >= 10) return;
+    setCategories(prev => [...prev, {
+      name: newCatName.trim(),
+      suggested: false,
+      subTasks: []
+    }]);
+    setNewCatName("");
+  };
+  const updateCategory = useCallback((idx, updatedOrFn) => {
+    setCategories(prev => prev.map((c, i) => {
+      if (i !== idx) return c;
+      return typeof updatedOrFn === "function" ? updatedOrFn(c) : updatedOrFn;
+    }));
+  }, []);
+  const removeCategory = idx => {
+    setCategories(prev => prev.filter((_, i) => i !== idx));
+  };
+  const toggleExpectation = exp => {
+    setExpectations(prev => prev.includes(exp) ? prev.filter(e => e !== exp) : [...prev, exp]);
+  };
+
+  // Computed
+  const allSelected = categories.flatMap(c => c.subTasks.filter(s => s.selected && s.analysis));
+  const totalMonthly = allSelected.reduce((s, t) => s + (t.analysis?.hoursPerPersonPerMonth || 0) * (t.analysis?.estimatedPeople || 0), 0);
+  const totalMonthlySaved = allSelected.reduce((s, t) => {
+    const a = t.analysis;
+    const monthly = (a?.hoursPerPersonPerMonth || 0) * (a?.estimatedPeople || 0);
+    return s + (a ? Math.round(monthly * a.potentialReduction / 100) : 0);
+  }, 0);
+  const totalAnnualSaved = totalMonthlySaved * 12;
+  const anyLoading = categories.some(c => c.subTasks.some(s => s.loading));
+  const canStep1 = company.name && company.personName && company.industry && company.employees;
+  const canStep2 = categories.length >= 1 && allSelected.length >= 1 && !anyLoading;
+  const canStep4 = aiUsage && expectations.length > 0;
+
+  // ── Google Form設定 ──
+  // フォーム作成後、以下のIDをフォームのentry IDに差し替えてください
+  const GFORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSePFMpiEWclL3HKGgU3DlPmbNd_ABKkHM_-fpjRfNSJF9rJ_A/formResponse";
+  const GFORM_FIELDS = {
+    personName: "entry.711197088",
+    // お名前
+    companyName: "entry.505972181",
+    // 会社名
+    role: "entry.1623975311",
+    // 役職
+    industry: "entry.809739536",
+    // 業種
+    employees: "entry.340057614",
+    // 社員数
+    analysisJson: "entry.1938178129",
+    // 業務分析結果（JSON）
+    totalMonthly: "entry.1901993811",
+    // 月間合計工数
+    monthlySaved: "entry.647570951",
+    // 月間削減時間
+    monthlyCost: "entry.1135712743",
+    // 月間削減コスト
+    aiUsage: "entry.1324719217",
+    // AI利用状況
+    expectations: "entry.1150739420",
+    // セミナーで知りたいこと
+    biggestPain: "entry.1945696114",
+    // 一番困っていること
+    currentTools: "entry.1830947594" // 現在のITツール
+  };
+  const handleSubmit = async () => {
+    // 分析結果をまとめる
+    const analysisData = categories.filter(c => c.subTasks.some(s => s.selected)).map(cat => ({
+      category: cat.name,
+      tasks: cat.subTasks.filter(s => s.selected && s.analysis).map(s => ({
+        name: s.name,
+        hoursPerPerson: s.analysis.hoursPerPersonPerMonth,
+        people: s.analysis.estimatedPeople,
+        totalHours: (s.analysis.hoursPerPersonPerMonth || 0) * (s.analysis.estimatedPeople || 0),
+        reduction: s.analysis.potentialReduction,
+        reason: s.analysis.reductionReason,
+        useCase: s.analysis.aiUseCases,
+        concern: s.concern || "",
+        concernSolution: s.concernSolution?.solution || ""
+      }))
+    }));
+
+    // Google Formにバックグラウンド送信
+    try {
+      const formData = new URLSearchParams();
+      formData.append(GFORM_FIELDS.personName, company.personName);
+      formData.append(GFORM_FIELDS.companyName, company.name);
+      formData.append(GFORM_FIELDS.role, company.role);
+      formData.append(GFORM_FIELDS.industry, company.industry);
+      formData.append(GFORM_FIELDS.employees, company.employees);
+      formData.append(GFORM_FIELDS.analysisJson, JSON.stringify(analysisData, null, 2));
+      formData.append(GFORM_FIELDS.totalMonthly, `${totalMonthly}時間`);
+      formData.append(GFORM_FIELDS.monthlySaved, `${totalMonthlySaved}時間`);
+      formData.append(GFORM_FIELDS.monthlyCost, `¥${(totalMonthlySaved * 3000).toLocaleString()}`);
+      formData.append(GFORM_FIELDS.aiUsage, AI_USAGE_OPTIONS.find(o => o.value === aiUsage)?.label || aiUsage);
+      formData.append(GFORM_FIELDS.expectations, expectations.join("、"));
+      formData.append(GFORM_FIELDS.biggestPain, biggestPain);
+      formData.append(GFORM_FIELDS.currentTools, currentTools);
+      fetch(GFORM_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: formData.toString()
+      });
+    } catch (e) {
+      console.error("Form submit error:", e);
+    }
+    setSubmitted(true);
+    console.log("SUBMIT:", {
+      company,
+      analysisData,
+      aiUsage,
+      expectations,
+      totalMonthly,
+      totalMonthlySaved
+    });
+  };
+  const handleReset = async () => {
+    await clearState();
+    setStep(1);
+    setCompany({
+      name: "",
+      personName: "",
+      role: "",
+      industry: "",
+      employees: ""
+    });
+    setCategories([]);
+    setAiUsage("");
+    setExpectations([]);
+    setBiggestPain("");
+    setCurrentTools("");
+    setSubmitted(false);
+  };
+  if (!loaded) return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      background: BRAND.lightBg,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: BRAND.gold,
+      fontSize: 16
+    }
+  }, "\u8AAD\u307F\u8FBC\u307F\u4E2D..."));
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      background: BRAND.lightBg,
+      fontFamily: "'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN',sans-serif"
+    }
+  }, /*#__PURE__*/React.createElement("style", null, `@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeOut{from{opacity:1}to{opacity:0}}
+        input[type=number]::-webkit-inner-spin-button{opacity:1}`), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.black,
+      padding: "14px 20px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      position: "sticky",
+      top: 0,
+      zIndex: 100
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: BRAND.gold,
+      fontSize: 17,
+      fontWeight: 800,
+      letterSpacing: 1
+    }
+  }, "\u3042\u306A\u305F\u306E\u696D\u52D9\u3092\u524A\u6E1B\u3057\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: BRAND.gray,
+      fontSize: 10,
+      marginTop: 1
+    }
+  }, "AI\u5C0E\u5165\u30DE\u30C3\u30D7 \u2014 YeLLOWS DX")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12
+    }
+  }, showSaveMsg && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: BRAND.green,
+      fontSize: 11,
+      animation: "fadeIn 0.2s ease"
+    }
+  }, "\u2713 \u4FDD\u5B58\u6E08\u307F"), /*#__PURE__*/React.createElement("img", {
+    src: YELLOWS_LOGO,
+    alt: "YeLLOWS",
+    style: {
+      height: 22,
+      filter: "invert(1) brightness(2)"
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 680,
+      margin: "0 auto",
+      padding: "20px 16px 80px"
+    }
+  }, /*#__PURE__*/React.createElement(StepBar, {
+    current: step
+  }), step === 1 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      animation: "fadeIn 0.3s ease"
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 20,
+      fontWeight: 800,
+      color: BRAND.dark,
+      marginBottom: 4
+    }
+  }, "\u4F1A\u793E\u60C5\u5831"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: BRAND.gray,
+      marginBottom: 20,
+      lineHeight: 1.7
+    }
+  }, "\u5FA1\u793E\u306E\u696D\u7A2E\u30FB\u898F\u6A21\u306B\u5408\u308F\u305B\u3066\u3001AI\u304C\u6700\u9069\u306A\u696D\u52D9\u6539\u5584\u30D7\u30E9\u30F3\u3092\u4F5C\u6210\u3057\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.white,
+      borderRadius: 12,
+      padding: 20,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.06)"
+    }
+  }, [{
+    label: "お名前",
+    val: company.personName,
+    key: "personName",
+    ph: "関本 大輔"
+  }, {
+    label: "会社名",
+    val: company.name,
+    key: "name",
+    ph: "株式会社○○"
+  }].map(f => /*#__PURE__*/React.createElement("div", {
+    key: f.key,
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: BRAND.dark,
+      display: "block",
+      marginBottom: 5
+    }
+  }, f.label), /*#__PURE__*/React.createElement("input", {
+    value: f.val,
+    onChange: e => setCompany(p => ({
+      ...p,
+      [f.key]: e.target.value
+    })),
+    placeholder: f.ph,
+    style: {
+      width: "100%",
+      padding: "10px 12px",
+      fontSize: 15,
+      border: "1.5px solid #DDD",
+      borderRadius: 8,
+      outline: "none",
+      boxSizing: "border-box"
+    },
+    onFocus: e => e.target.style.borderColor = BRAND.gold,
+    onBlur: e => e.target.style.borderColor = "#DDD"
+  }))), [{
+    label: "業種",
+    val: company.industry,
+    key: "industry",
+    opts: INDUSTRIES
+  }, {
+    label: "社員数",
+    val: company.employees,
+    key: "employees",
+    opts: EMPLOYEE_RANGES
+  }, {
+    label: "役職",
+    val: company.role,
+    key: "role",
+    opts: ROLES
+  }].map(f => /*#__PURE__*/React.createElement("div", {
+    key: f.key,
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: BRAND.dark,
+      display: "block",
+      marginBottom: 5
+    }
+  }, f.label), /*#__PURE__*/React.createElement("select", {
+    value: f.val,
+    onChange: e => setCompany(p => ({
+      ...p,
+      [f.key]: e.target.value
+    })),
+    style: {
+      width: "100%",
+      padding: "10px 12px",
+      fontSize: 15,
+      border: "1.5px solid #DDD",
+      borderRadius: 8,
+      background: BRAND.white,
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "\u9078\u629E\u3057\u3066\u304F\u3060\u3055\u3044"), f.opts.map(o => /*#__PURE__*/React.createElement("option", {
+    key: o,
+    value: o
+  }, o)))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 20,
+      textAlign: "right"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    onClick: () => setStep(2),
+    disabled: !canStep1
+  }, "\u6B21\u3078 \u2192"))), step === 2 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      animation: "fadeIn 0.3s ease"
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 20,
+      fontWeight: 800,
+      color: BRAND.dark,
+      marginBottom: 4
+    }
+  }, "\u696D\u52D9\u306E\u68DA\u5378\u3057"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: BRAND.gray,
+      marginBottom: 6,
+      lineHeight: 1.7
+    }
+  }, "\u300C\u55B6\u696D\u300D\u300C\u7D4C\u7406\u300D\u306A\u3069\u696D\u52D9\u306E\u5927\u9805\u76EE\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\u3002", /*#__PURE__*/React.createElement("br", null), "AI\u304C\u305D\u306E\u4E2D\u306E\u5DE5\u7A0B\u3092\u81EA\u52D5\u3067\u63D0\u6848\u3057\u307E\u3059\u306E\u3067\u3001\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u306B\u30C1\u30A7\u30C3\u30AF\u3092\u5165\u308C\u3066\u304F\u3060\u3055\u3044\u3002"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: newCatName,
+    onChange: e => setNewCatName(e.target.value),
+    onKeyDown: e => e.key === "Enter" && addCategory(),
+    placeholder: "\u696D\u52D9\u306E\u5927\u9805\u76EE\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\uFF08\u4F8B\uFF1A\u55B6\u696D\u3001\u7D4C\u7406\u3001\u4EBA\u4E8B\u3001\u5E83\u5831...\uFF09",
+    style: {
+      flex: 1,
+      padding: "12px 14px",
+      fontSize: 15,
+      border: `2px solid ${BRAND.gold}`,
+      borderRadius: 8,
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  }), /*#__PURE__*/React.createElement(Btn, {
+    onClick: addCategory,
+    disabled: !newCatName.trim() || categories.length >= 10
+  }, "\u8FFD\u52A0")), allSelected.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.dark,
+      borderRadius: 10,
+      padding: "12px 16px",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-around",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u6708\u9593\u5408\u8A08"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 800,
+      color: BRAND.white
+    }
+  }, totalMonthly, "\u6642\u9593")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u6708\u9593\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 800,
+      color: BRAND.gold
+    }
+  }, totalMonthlySaved, "\u6642\u9593")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u6708\u9593\u30B3\u30B9\u30C8\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 800,
+      color: BRAND.green
+    }
+  }, "\xA5", (totalMonthlySaved * 3000).toLocaleString()))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: "1px solid rgba(255,255,255,0.1)",
+      paddingTop: 8,
+      display: "flex",
+      justifyContent: "space-around"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u5E74\u9593\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 800,
+      color: BRAND.gold
+    }
+  }, totalAnnualSaved, "\u6642\u9593")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u5E74\u9593\u30B3\u30B9\u30C8\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 800,
+      color: BRAND.green
+    }
+  }, "\xA5", (totalAnnualSaved * 3000).toLocaleString()))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: BRAND.gray,
+      textAlign: "right",
+      marginTop: 4
+    }
+  }, "\u203B\u6642\u7D663,000\u5186\u63DB\u7B97")), categories.map((cat, i) => /*#__PURE__*/React.createElement(CategoryCard, {
+    key: i,
+    cat: cat,
+    catIdx: i,
+    industry: company.industry,
+    employees: company.employees,
+    onUpdate: updateCategory,
+    onRemove: removeCategory
+  })), categories.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: 40,
+      color: BRAND.gray,
+      fontSize: 13,
+      background: BRAND.white,
+      borderRadius: 12,
+      lineHeight: 1.8
+    }
+  }, "\u4E0A\u306E\u5165\u529B\u6B04\u306B\u300C\u55B6\u696D\u300D\u300C\u7D4C\u7406\u300D\u306A\u3069\u306E\u696D\u52D9\u540D\u3092\u5165\u529B\u3057\u3066", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: BRAND.gold,
+      fontWeight: 600
+    }
+  }, "\u300C\u8FFD\u52A0\u300D\u30DC\u30BF\u30F3"), "\u3092\u62BC\u3057\u3066\u304F\u3060\u3055\u3044"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 20,
+      display: "flex",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: () => setStep(1)
+  }, "\u2190 \u623B\u308B"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: () => setStep(3),
+    disabled: !canStep2
+  }, "\u78BA\u8A8D\u3078 \u2192"))), step === 3 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      animation: "fadeIn 0.3s ease"
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 20,
+      fontWeight: 800,
+      color: BRAND.dark,
+      marginBottom: 4
+    }
+  }, "AI\u5316\u306E\u78BA\u8A8D\u3068\u61F8\u5FF5\u70B9"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: BRAND.gray,
+      marginBottom: 20,
+      lineHeight: 1.7
+    }
+  }, "\u9078\u629E\u3055\u308C\u305F\u696D\u52D9\u306EAI\u5316\u5206\u6790\u7D50\u679C\u3067\u3059\u3002", /*#__PURE__*/React.createElement("br", null), "\u300C\u54C1\u8CEA\u306F\u5927\u4E08\u592B\uFF1F\u300D\u300C\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u304C\u5FC3\u914D\u300D\u306A\u3069\u4E0D\u5B89\u306A\u70B9\u304C\u3042\u308C\u3070\u3001", /*#__PURE__*/React.createElement("br", null), "\u5404\u696D\u52D9\u306E\u4E0B\u306B\u3042\u308B\u5165\u529B\u6B04\u306B\u66F8\u3044\u3066Enter\u3092\u62BC\u3057\u3066\u304F\u3060\u3055\u3044\u3002AI\u304C\u89E3\u6C7A\u7B56\u3092\u63D0\u6848\u3057\u307E\u3059\u3002"), categories.filter(c => c.subTasks.some(s => s.selected)).map((cat, ci) => {
+    const catIdxInAll = categories.indexOf(cat);
+    return /*#__PURE__*/React.createElement("div", {
+      key: ci,
+      style: {
+        background: BRAND.white,
+        borderRadius: 12,
+        marginBottom: 16,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        overflow: "hidden"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: BRAND.dark,
+        padding: "10px 16px"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: BRAND.gold,
+        fontSize: 15,
+        fontWeight: 700
+      }
+    }, cat.name)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "8px 0"
+      }
+    }, cat.subTasks.filter(s => s.selected && s.analysis).sort((a, b) => {
+      const o = {
+        high: 0,
+        medium: 1,
+        low: 2
+      };
+      return (o[a.analysis.priority] || 2) - (o[b.analysis.priority] || 2);
+    }).map((sub, si) => {
+      const subIdxInCat = cat.subTasks.indexOf(sub);
+      return /*#__PURE__*/React.createElement("div", {
+        key: si,
+        style: {
+          padding: "12px 16px",
+          borderBottom: "1px solid #F0F0F0"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 6
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 8
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 14,
+          fontWeight: 700,
+          color: BRAND.dark
+        }
+      }, sub.name), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 10,
+          fontWeight: 700,
+          padding: "2px 8px",
+          borderRadius: 8,
+          background: PRI[sub.analysis.priority]?.bg || BRAND.gray,
+          color: BRAND.white
+        }
+      }, PRI[sub.analysis.priority]?.label)), /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 12
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 12,
+          color: BRAND.gray
+        }
+      }, sub.analysis.hoursPerPersonPerMonth, "\u6642\u9593 \xD7 ", sub.analysis.estimatedPeople, "\u540D = ", (sub.analysis.hoursPerPersonPerMonth || 0) * (sub.analysis.estimatedPeople || 0), "\u6642\u9593/\u6708"), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 16,
+          fontWeight: 800,
+          color: BRAND.green
+        }
+      }, "-", sub.analysis.potentialReduction, "%"))), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11,
+          color: "#666",
+          marginBottom: 8,
+          lineHeight: 1.6
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: BRAND.green,
+          fontWeight: 600
+        }
+      }, "\uD83D\uDCCA \u524A\u6E1B\u306E\u6839\u62E0:"), " ", sub.analysis.reductionReason), !sub.concern && !sub.concernSolution && (() => {
+        const handleConcernSubmit = async inputEl => {
+          const val = inputEl.value.trim();
+          if (!val) return;
+          const concernText = val;
+          inputEl.value = "";
+          updateCategory(catIdxInAll, prev => ({
+            ...prev,
+            subTasks: prev.subTasks.map((s, i) => i === subIdxInCat ? {
+              ...s,
+              concern: concernText,
+              concernLoading: true
+            } : s)
+          }));
+          const solution = await solveConcern(sub.name, cat.name, company.industry, concernText);
+          updateCategory(catIdxInAll, prev => ({
+            ...prev,
+            subTasks: prev.subTasks.map((s, i) => i === subIdxInCat ? {
+              ...s,
+              concernLoading: false,
+              concernSolution: solution || {
+                solution: "まず小さな範囲で自動チェックの仕組みをAIでつくりましょう",
+                method: "AIで下書き生成→人が確認する流れをつくりましょう",
+                checkProcess: "AIの出力を人の目で確認して、精度を見極めましょう",
+                timeToCheck: "セミナーで具体的に試算いたします"
+              }
+            } : s)
+          }));
+        };
+        return /*#__PURE__*/React.createElement("div", {
+          style: {
+            display: "flex",
+            gap: 6
+          }
+        }, /*#__PURE__*/React.createElement("input", {
+          placeholder: "AI\u5316\u3067\u4E0D\u5B89\u306A\u3053\u3068\u304C\u3042\u308C\u3070\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\uFF08\u4F8B\uFF1A\u6570\u5B57\u306E\u6B63\u78BA\u6027\u3001\u500B\u4EBA\u60C5\u5831\u306E\u53D6\u6271\u3044...\uFF09",
+          style: {
+            flex: 1,
+            padding: "8px 10px",
+            fontSize: 12,
+            border: "1.5px solid #E0E0E0",
+            borderRadius: 6,
+            outline: "none",
+            boxSizing: "border-box",
+            background: "#FAFAFA"
+          },
+          onFocus: e => e.target.style.borderColor = BRAND.orange,
+          onBlur: e => e.target.style.borderColor = "#E0E0E0",
+          onKeyDown: e => {
+            if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+              e.preventDefault();
+              handleConcernSubmit(e.target);
+            }
+          }
+        }), /*#__PURE__*/React.createElement("button", {
+          onClick: e => {
+            const input = e.target.parentElement.querySelector("input");
+            handleConcernSubmit(input);
+          },
+          style: {
+            padding: "8px 14px",
+            fontSize: 11,
+            fontWeight: 700,
+            background: BRAND.orange,
+            color: BRAND.white,
+            border: "none",
+            borderRadius: 6,
+            cursor: "pointer",
+            whiteSpace: "nowrap"
+          }
+        }, "\u9001\u4FE1"));
+      })(), sub.concern && sub.concernLoading && /*#__PURE__*/React.createElement("div", {
+        style: {
+          marginTop: 6
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          padding: "8px 12px",
+          background: "#FFF3E0",
+          borderRadius: 6,
+          borderLeft: `3px solid ${BRAND.orange}`,
+          fontSize: 12,
+          marginBottom: 6
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: 700,
+          color: BRAND.orange
+        }
+      }, "\u61F8\u5FF5:"), " ", sub.concern), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          color: BRAND.gold,
+          padding: "4px 0"
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          animation: "spin 1s linear infinite",
+          display: "inline-block"
+        }
+      }, "\u27F3"), " \u89E3\u6C7A\u30A2\u30D7\u30ED\u30FC\u30C1\u3092\u691C\u8A0E\u4E2D...")), sub.concern && sub.concernSolution && !sub.concernLoading && /*#__PURE__*/React.createElement("div", {
+        style: {
+          marginTop: 6
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          padding: "8px 12px",
+          background: "#FFF3E0",
+          borderRadius: 6,
+          borderLeft: `3px solid ${BRAND.orange}`,
+          fontSize: 12,
+          marginBottom: 6
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: 700,
+          color: BRAND.orange
+        }
+      }, "\u61F8\u5FF5:"), " ", sub.concern, /*#__PURE__*/React.createElement("button", {
+        onClick: () => {
+          updateCategory(catIdxInAll, prev => ({
+            ...prev,
+            subTasks: prev.subTasks.map((s, i) => i === subIdxInCat ? {
+              ...s,
+              concern: undefined,
+              concernSolution: undefined,
+              concernLoading: false
+            } : s)
+          }));
+        },
+        style: {
+          background: "none",
+          border: "none",
+          color: BRAND.gray,
+          fontSize: 14,
+          cursor: "pointer",
+          marginLeft: 8,
+          padding: 0
+        }
+      }, "\xD7")), /*#__PURE__*/React.createElement("div", {
+        style: {
+          padding: "10px 12px",
+          background: "#E3F2FD",
+          borderRadius: 6,
+          borderLeft: `3px solid ${BRAND.blue}`,
+          fontSize: 12,
+          lineHeight: 1.7
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontWeight: 700,
+          color: BRAND.blue,
+          marginBottom: 4
+        }
+      }, "\u2705 \u89E3\u6C7A\u30A2\u30D7\u30ED\u30FC\u30C1"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          marginBottom: 6
+        }
+      }, sub.concernSolution.solution), /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 6
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          background: "rgba(255,255,255,0.7)",
+          borderRadius: 4,
+          padding: "4px 8px"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: BRAND.gray
+        }
+      }, "\u5B9F\u73FE\u65B9\u6CD5"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11,
+          fontWeight: 600
+        }
+      }, sub.concernSolution.method)), /*#__PURE__*/React.createElement("div", {
+        style: {
+          background: "rgba(255,255,255,0.7)",
+          borderRadius: 4,
+          padding: "4px 8px"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: BRAND.gray
+        }
+      }, "\u30C1\u30A7\u30C3\u30AF\u65B9\u6CD5"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11,
+          fontWeight: 600
+        }
+      }, sub.concernSolution.checkProcess))), /*#__PURE__*/React.createElement("div", {
+        style: {
+          marginTop: 6,
+          fontSize: 11,
+          color: BRAND.green,
+          fontWeight: 600
+        }
+      }, "\u23F1 \u30C1\u30A7\u30C3\u30AF\u6642\u9593: ", sub.concernSolution.timeToCheck))));
+    })));
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.dark,
+      borderRadius: 10,
+      padding: "14px 20px",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-around",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u6708\u9593\u5408\u8A08\u5DE5\u6570"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 800,
+      color: BRAND.white
+    }
+  }, totalMonthly, "\u6642\u9593")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u6708\u9593\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 800,
+      color: BRAND.gold
+    }
+  }, totalMonthlySaved, "\u6642\u9593")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u6708\u9593\u30B3\u30B9\u30C8\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 800,
+      color: BRAND.green
+    }
+  }, "\xA5", (totalMonthlySaved * 3000).toLocaleString()))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: "1px solid rgba(255,255,255,0.1)",
+      paddingTop: 10,
+      display: "flex",
+      justifyContent: "space-around"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u5E74\u9593\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 800,
+      color: BRAND.gold
+    }
+  }, totalAnnualSaved, "\u6642\u9593")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u5E74\u9593\u30B3\u30B9\u30C8\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 800,
+      color: BRAND.green
+    }
+  }, "\xA5", (totalAnnualSaved * 3000).toLocaleString()))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: BRAND.gray,
+      textAlign: "right",
+      marginTop: 4
+    }
+  }, "\u203B\u6642\u7D663,000\u5186\u63DB\u7B97")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: () => setStep(2)
+  }, "\u2190 \u4FEE\u6B63\u3059\u308B"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: () => setStep(4)
+  }, "\u6B21\u3078 \u2192"))), step === 4 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      animation: "fadeIn 0.3s ease"
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 20,
+      fontWeight: 800,
+      color: BRAND.dark,
+      marginBottom: 4
+    }
+  }, "\u3042\u3068\u5C11\u3057\u3067\u3059"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: BRAND.gray,
+      marginBottom: 20,
+      lineHeight: 1.7
+    }
+  }, "\u30BB\u30DF\u30CA\u30FC\u5F53\u65E5\u306B\u3001\u3042\u306A\u305F\u306B\u5408\u3063\u305F\u5185\u5BB9\u3092\u304A\u5C4A\u3051\u3059\u308B\u305F\u3081\u306E\u8CEA\u554F\u3067\u3059\u3002", /*#__PURE__*/React.createElement("br", null), "\u305D\u308C\u305E\u308C\u9078\u629E\u3057\u3066\u304F\u3060\u3055\u3044\u3002"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.white,
+      borderRadius: 12,
+      padding: 20,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: BRAND.dark,
+      marginBottom: 10
+    }
+  }, "\u73FE\u5728\u306EAI\u5229\u7528\u72B6\u6CC1"), AI_USAGE_OPTIONS.map(o => /*#__PURE__*/React.createElement("label", {
+    key: o.value,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "9px 12px",
+      marginBottom: 4,
+      borderRadius: 8,
+      cursor: "pointer",
+      background: aiUsage === o.value ? "#FFF9E0" : "transparent",
+      border: aiUsage === o.value ? `2px solid ${BRAND.gold}` : "2px solid transparent"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    checked: aiUsage === o.value,
+    onChange: () => setAiUsage(o.value),
+    style: {
+      accentColor: BRAND.gold
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14
+    }
+  }, o.label)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.white,
+      borderRadius: 12,
+      padding: 20,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: BRAND.dark,
+      marginBottom: 4
+    }
+  }, "\u4E00\u756A\u56F0\u3063\u3066\u3044\u308B\u3053\u3068\u30FB\u89E3\u6C7A\u3057\u305F\u3044\u3053\u3068"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: BRAND.gray,
+      marginBottom: 10
+    }
+  }, "\u696D\u52D9\u3067\u6700\u3082\u30B9\u30C8\u30EC\u30B9\u3092\u611F\u3058\u3066\u3044\u308B\u3053\u3068\u3001\u6642\u9593\u304C\u304B\u304B\u3063\u3066\u3044\u308B\u3053\u3068\u3092\u6559\u3048\u3066\u304F\u3060\u3055\u3044"), /*#__PURE__*/React.createElement("textarea", {
+    value: biggestPain,
+    onChange: e => setBiggestPain(e.target.value),
+    placeholder: "\u4F8B\uFF1A\u6BCE\u6708\u306E\u5831\u544A\u66F8\u4F5C\u6210\u306B\u4E381\u65E5\u304B\u304B\u308B\u3001\u898B\u7A4D\u3082\u308A\u4F5C\u6210\u304C\u5C5E\u4EBA\u5316\u3057\u3066\u3044\u308B...",
+    rows: 3,
+    style: {
+      width: "100%",
+      padding: "10px 12px",
+      fontSize: 14,
+      lineHeight: 1.6,
+      border: "1.5px solid #DDD",
+      borderRadius: 8,
+      outline: "none",
+      boxSizing: "border-box",
+      resize: "vertical",
+      fontFamily: "inherit"
+    },
+    onFocus: e => e.target.style.borderColor = BRAND.gold,
+    onBlur: e => e.target.style.borderColor = "#DDD"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.white,
+      borderRadius: 12,
+      padding: 20,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: BRAND.dark,
+      marginBottom: 4
+    }
+  }, "\u73FE\u5728\u304A\u4F7F\u3044\u306EIT\u30C4\u30FC\u30EB"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: BRAND.gray,
+      marginBottom: 10
+    }
+  }, "\u696D\u52D9\u3067\u4F7F\u3063\u3066\u3044\u308B\u30C4\u30FC\u30EB\u3092\u6559\u3048\u3066\u304F\u3060\u3055\u3044\uFF08\u306A\u3051\u308C\u3070\u300C\u7279\u306B\u306A\u3057\u300D\u3067OK\uFF09"), /*#__PURE__*/React.createElement("input", {
+    value: currentTools,
+    onChange: e => setCurrentTools(e.target.value),
+    placeholder: "\u4F8B\uFF1AExcel\u3001Google Workspace\u3001kintone\u3001freee\u3001Slack...",
+    style: {
+      width: "100%",
+      padding: "10px 12px",
+      fontSize: 14,
+      border: "1.5px solid #DDD",
+      borderRadius: 8,
+      outline: "none",
+      boxSizing: "border-box"
+    },
+    onFocus: e => e.target.style.borderColor = BRAND.gold,
+    onBlur: e => e.target.style.borderColor = "#DDD"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.white,
+      borderRadius: 12,
+      padding: 20,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: BRAND.dark,
+      marginBottom: 10
+    }
+  }, "\u30BB\u30DF\u30CA\u30FC\u3067\u4E00\u756A\u77E5\u308A\u305F\u3044\u3053\u3068\uFF08\u8907\u6570\u9078\u629E\u53EF\uFF09"), EXPECTATIONS.map(exp => /*#__PURE__*/React.createElement("label", {
+    key: exp,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "9px 12px",
+      marginBottom: 4,
+      borderRadius: 8,
+      cursor: "pointer",
+      background: expectations.includes(exp) ? "#FFF9E0" : "transparent",
+      border: expectations.includes(exp) ? `2px solid ${BRAND.gold}` : "2px solid transparent"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: expectations.includes(exp),
+    onChange: () => toggleExpectation(exp),
+    style: {
+      accentColor: BRAND.gold
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14
+    }
+  }, exp)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 20,
+      display: "flex",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: () => setStep(3)
+  }, "\u2190 \u623B\u308B"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: () => setStep(5),
+    disabled: !canStep4
+  }, "\u78BA\u8A8D \u2192"))), step === 5 && !submitted && /*#__PURE__*/React.createElement("div", {
+    style: {
+      animation: "fadeIn 0.3s ease"
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 20,
+      fontWeight: 800,
+      color: BRAND.dark,
+      marginBottom: 4
+    }
+  }, "\u9001\u4FE1\u5185\u5BB9\u306E\u78BA\u8A8D"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: BRAND.gray,
+      marginBottom: 20
+    }
+  }, "\u4EE5\u4E0B\u306E\u5185\u5BB9\u3067\u95A2\u672C\u306B\u9001\u4FE1\u3057\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.white,
+      borderRadius: 12,
+      padding: 16,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 700,
+      marginBottom: 2
+    }
+  }, company.personName, "\u3000", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: BRAND.gray,
+      fontWeight: 400
+    }
+  }, company.role)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      marginBottom: 2
+    }
+  }, company.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: BRAND.gray
+    }
+  }, company.industry, " / ", company.employees), biggestPain && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: BRAND.dark,
+      marginTop: 8,
+      padding: "6px 10px",
+      background: BRAND.lightBg,
+      borderRadius: 6
+    }
+  }, "\uD83D\uDCAC ", biggestPain), currentTools && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: BRAND.gray,
+      marginTop: 4
+    }
+  }, "\uD83D\uDD27 ", currentTools)), categories.filter(c => c.subTasks.some(s => s.selected)).map((cat, ci) => /*#__PURE__*/React.createElement("div", {
+    key: ci,
+    style: {
+      background: BRAND.white,
+      borderRadius: 12,
+      padding: 16,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: BRAND.gold,
+      marginBottom: 8
+    }
+  }, cat.name), cat.subTasks.filter(s => s.selected).map((s, si) => /*#__PURE__*/React.createElement("div", {
+    key: si,
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      padding: "4px 0",
+      borderBottom: "1px solid #F0F0F0",
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("span", null, s.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: BRAND.green,
+      fontWeight: 700
+    }
+  }, "-", s.analysis?.potentialReduction, "%"))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.gold,
+      borderRadius: 10,
+      padding: "12px 20px",
+      textAlign: "center",
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: BRAND.black
+    }
+  }, "\u6708\u9593\u524A\u6E1B: ", totalMonthlySaved, "\u6642\u9593 \u2252 \xA5", (totalMonthlySaved * 3000).toLocaleString()), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: "rgba(0,0,0,0.6)",
+      marginTop: 4
+    }
+  }, "\u5E74\u9593\u524A\u6E1B: ", totalAnnualSaved, "\u6642\u9593 \u2252 \xA5", (totalAnnualSaved * 3000).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: () => setStep(4)
+  }, "\u2190 \u623B\u308B"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: handleSubmit,
+    style: {
+      background: BRAND.green,
+      color: BRAND.white
+    }
+  }, "\u9001\u4FE1\u3059\u308B \u2713"))), submitted && /*#__PURE__*/React.createElement("div", {
+    style: {
+      animation: "fadeIn 0.3s ease",
+      textAlign: "center",
+      paddingTop: 32
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 60,
+      height: 60,
+      borderRadius: "50%",
+      background: BRAND.green,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      margin: "0 auto 16px",
+      fontSize: 28,
+      color: BRAND.white
+    }
+  }, "\u2713"), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 22,
+      fontWeight: 800,
+      color: BRAND.dark,
+      marginBottom: 8
+    }
+  }, "\u9001\u4FE1\u5B8C\u4E86"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 14,
+      color: BRAND.gray,
+      lineHeight: 1.8,
+      marginBottom: 24
+    }
+  }, "\u3044\u305F\u3060\u3044\u305F\u60C5\u5831\u3092\u3082\u3068\u306B\u3001\u95A2\u672C\u304C", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: BRAND.dark
+    }
+  }, "\u5FA1\u793E\u5C02\u7528\u306EAI\u5C0E\u5165\u30DE\u30C3\u30D7\u306E\u53E9\u304D\u53F0"), "\u3092", /*#__PURE__*/React.createElement("br", null), "\u30BB\u30DF\u30CA\u30FC\u5F53\u65E5\u307E\u3067\u306B\u6E96\u5099\u3057\u307E\u3059\u3002"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BRAND.white,
+      borderRadius: 12,
+      padding: 20,
+      textAlign: "left",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+      maxWidth: 400,
+      margin: "0 auto 20px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      marginBottom: 12
+    }
+  }, company.name, "\u306E\u5206\u6790\u30B5\u30DE\u30EA\u30FC"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: 10,
+      background: BRAND.lightBg,
+      borderRadius: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u5206\u6790\u696D\u52D9\u6570"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 26,
+      fontWeight: 800,
+      color: BRAND.dark
+    }
+  }, allSelected.length)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: 10,
+      background: BRAND.lightBg,
+      borderRadius: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u6708\u9593\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 800,
+      color: BRAND.green
+    }
+  }, totalMonthlySaved, "\u6642\u9593"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: BRAND.gray
+    }
+  }, "\xA5", (totalMonthlySaved * 3000).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: 10,
+      background: BRAND.dark,
+      borderRadius: 8,
+      gridColumn: "1/3"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: BRAND.gray
+    }
+  }, "\u5E74\u9593\u524A\u6E1B"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 30,
+      fontWeight: 800,
+      color: BRAND.gold
+    }
+  }, totalAnnualSaved, "\u6642\u9593 \u2252 \xA5", (totalAnnualSaved * 3000).toLocaleString()), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: BRAND.gray
+    }
+  }, "\u203B\u6642\u7D663,000\u5186\u63DB\u7B97")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "16px 20px",
+      background: BRAND.black,
+      borderRadius: 10,
+      maxWidth: 400,
+      margin: "0 auto 20px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("img", {
+    src: YELLOWS_LOGO,
+    alt: "YeLLOWS",
+    style: {
+      height: 16,
+      filter: "invert(1) brightness(2)"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: BRAND.gold,
+      fontSize: 13,
+      fontWeight: 700
+    }
+  }, "\u7D4C\u55B6\u8005\u7279\u5225\u30BB\u30DF\u30CA\u30FC")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#CCC",
+      fontSize: 12,
+      lineHeight: 1.8
+    }
+  }, "\u3053\u306E\u30DE\u30C3\u30D7\u3092\u3082\u3068\u306B\u3001\u5FA1\u793E\u5C02\u7528\u306EAI\u5C0E\u5165\u8A08\u753B\u3092", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: BRAND.gold
+    }
+  }, "\u300C\u4E00\u7DD2\u306B\u4F5C\u308B\u300D"), "\u30BB\u30DF\u30CA\u30FC\u3067\u3059\u3002")), /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: handleReset,
+    style: {
+      fontSize: 12
+    }
+  }, "\u30EA\u30BB\u30C3\u30C8\u3057\u3066\u6700\u521D\u304B\u3089"))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(AIMapHearingV2));
+</script>
+</body>
+</html>
